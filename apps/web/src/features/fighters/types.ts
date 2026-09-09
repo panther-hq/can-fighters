@@ -11,6 +11,8 @@ export interface FighterStats {
   speed: number
   crit: number
   powerScore: number
+  budget: number
+  pvpLegal: boolean
 }
 
 export interface FighterSkill {

@@ -16,7 +16,27 @@ placeholder so the decisions have a home when the Balance Engine lands (Phase 5)
 
 `HP · ATK · DEF · MAG · SPD · CRIT` (spec §14).
 
-## Engine shape (spec §16)
+## Engine shape (spec §16) — implemented
 
-Input: class, secondaryClass, traits, skillFamilies, rarity, level, seed,
-equipment bonuses. Output: stats, skill parameters, powerScore.
+`App\Domain\Balance\StandardBalanceEngine::apply(Fighter)` — the only place
+numbers are set. Runs on mix, upgrade and mutate.
+
+1. **Budget** = `(base 100 + rarity bonus) × (1 + 0.09·(level−1))` (spec §15).
+2. **Raw stats** = `floor + classProfileWeight × scale` per stat; a secondary
+   class blends its profile in at 35%.
+3. **Normalise**: scale every raw stat by `budget / rawPowerScore` so the final
+   `power_score` lands on the budget (±rounding). Clamp to floors + `crit_cap`.
+4. **`pvp_legal`** = `power_score ≤ budget × 1.10`. By construction true for
+   engine output; the flag lets the Arena reject tampered fighters.
+5. **Skills**: `SkillParameterResolver` — per-family baselines from config,
+   level scaling, and offensive families scale `power` with the wielder's best
+   offence stat.
+
+Everything tunable lives in `config/balance.php`. `php artisan
+fighters:recompute-balance [--check]` re-runs / audits drift.
+
+## Class profile intent
+
+tank = HP+DEF wall · fighter = balanced melee · assassin = SPD+ATK+CRIT glass ·
+ranged = ATK+SPD · mage = MAG · support = MAG+HP+DEF · debuffer = MAG+SPD ·
+summoner = MAG · engineer = balanced bruiser · crafter = defensive/economic.

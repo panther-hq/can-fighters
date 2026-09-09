@@ -37,6 +37,8 @@ class FighterResource extends JsonResource
                 'speed' => $this->stats->speed,
                 'crit' => $this->stats->crit,
                 'powerScore' => $this->stats->power_score,
+                'budget' => $this->stats->budget,
+                'pvpLegal' => $this->stats->pvp_legal,
             ]),
             'skills' => $this->whenLoaded('skills', fn () => $this->skills->map(fn ($skill) => [
                 'slot' => $skill->slot,

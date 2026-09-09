@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['fighter_id', 'hp', 'attack', 'defense', 'magic', 'speed', 'crit', 'power_score'])]
+#[Fillable([
+    'fighter_id', 'hp', 'attack', 'defense', 'magic', 'speed', 'crit',
+    'power_score', 'budget', 'pvp_legal',
+])]
 class FighterStats extends Model
 {
     protected $table = 'fighter_stats';
@@ -23,6 +26,8 @@ class FighterStats extends Model
             'speed' => 'integer',
             'crit' => 'integer',
             'power_score' => 'integer',
+            'budget' => 'integer',
+            'pvp_legal' => 'boolean',
         ];
     }
 }

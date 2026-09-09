@@ -8,13 +8,13 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 4 — fighters & teams** (Phases 0–3 done).
-Fighters now carry real stats + skills from `Domain\Balance\StandardBalanceEngine`
-(`config/balance.php` — class weight profiles, rarity budget, level growth).
-`GET /api/fighters/{id}` (stats + skills), `POST .../upgrade` (coins → level),
-`POST .../mutate` (re-mix 1–3 ingredients — spec §19), `GET|PUT /api/teams`
-(3-slot campaign roster, spec §20). SPA gains fighter detail (stat bars,
-upgrade, mutate) and a Drużyna team builder.
+**Phase 5 — Balance Engine** (Phases 0–4 done).
+Stats are now normalised to a **Power Budget** (`base + rarity bonus`, level-
+scaled) so `power_score ≈ budget` — rarity is a small, predictable edge and
+classes stay comparable (spec §15). Each fighter carries a `pvp_legal` flag
+(`power_score ≤ budget × 1.10`). A `SkillParameterResolver` scales offensive
+skill power with the wielder's offence. `php artisan fighters:recompute-balance
+[--check]`. Everything tunable is in `config/balance.php`.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -139,9 +139,18 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
   (Przód/Środek/Tył slots + picker + save).
 - `queue:listen` (was `queue:work`) so the dev worker picks up code changes.
 
-**85 feature/unit tests.**
+**Phase 5 — Balance Engine**
 
-## Next: Phase 5
+- `StandardBalanceEngine` reworked: raw class-profile stats → normalise to the
+  Power Budget → `pvp_legal` check. `budget` + `pvp_legal` on `fighter_stats`.
+- `SkillParameterResolver` extracted; offensive skills scale with offence stat.
+- `config/balance.php` gains `pvp_tolerance`, `offensive_skills`, crit scale bump.
+- `fighters:recompute-balance --check` audits power drift / legality.
+- SPA fighter detail shows `moc / budżet` and a PvP-illegal warning.
 
-Balance Engine hardening: Power Budget enforcement, PvP legality, skill
-parameter resolver, tuning + tests. See spec §15–§17, §68.
+**163 feature/unit tests** (incl. a class × rarity × level budget matrix).
+
+## Next: Phase 6
+
+Battle Engine: deterministic seed, basic attacks, skills, targeting, damage,
+healing, effects, ordered battle events. See spec §32–§35, §69, §68.

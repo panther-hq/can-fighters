@@ -3,10 +3,12 @@ import { useState } from 'react'
 import { useInventory } from '../inventory/hooks'
 import type { MixIngredient } from '../mixer/types'
 import { useMutateFighter, useUpgradeFighter } from './hooks'
-import type { Fighter, FighterStats } from './types'
+import type { Fighter } from './types'
 import { classLabel, rarityLabel } from './types'
 
-const STAT_ROWS: { key: keyof FighterStats; label: string; max: number }[] = [
+type NumericStat = 'hp' | 'attack' | 'defense' | 'magic' | 'speed' | 'crit'
+
+const STAT_ROWS: { key: NumericStat; label: string; max: number }[] = [
   { key: 'hp', label: 'HP', max: 260 },
   { key: 'attack', label: 'Atak', max: 45 },
   { key: 'defense', label: 'Obrona', max: 45 },
@@ -78,7 +80,12 @@ export function FighterDetail({
               <span className="statbar__value">{stats[row.key]}</span>
             </div>
           ))}
-          <p className="detail__power">Moc: {stats.powerScore}</p>
+          <p className="detail__power">
+            Moc: {stats.powerScore} / budżet {stats.budget}
+          </p>
+          {!stats.pvpLegal && (
+            <p className="muted muted--bad">Niedozwolony w PvP (za wysoka moc).</p>
+          )}
         </div>
       )}
 

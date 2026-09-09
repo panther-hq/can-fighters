@@ -36,8 +36,8 @@ return [
         'crafter' => ['hp' => 1.2, 'attack' => 0.6, 'defense' => 1.1, 'magic' => 0.9, 'speed' => 0.9, 'crit' => 0.3],
     ],
 
-    // weight (at budget 100) -> stat value
-    'scale' => ['hp' => 28, 'attack' => 7, 'defense' => 7, 'magic' => 7, 'speed' => 7, 'crit' => 3],
+    // weight (at budget 100) -> raw stat value, before normalisation
+    'scale' => ['hp' => 28, 'attack' => 7, 'defense' => 7, 'magic' => 7, 'speed' => 7, 'crit' => 6],
     'floor' => ['hp' => 40, 'attack' => 4, 'defense' => 3, 'magic' => 2, 'speed' => 4, 'crit' => 1],
     'crit_cap' => 60,
 
@@ -46,6 +46,18 @@ return [
 
     // A secondary class blends its profile in at this ratio.
     'secondary_blend' => 0.35,
+
+    // Raw stats are scaled so power_score lands on the Power Budget (spec §15).
+    // A fighter is PvP-legal while power_score stays within this multiple of it.
+    'pvp_tolerance' => 1.10,
+
+    // Offensive skills scale their `power` with the fighter's best offence stat.
+    'offensive_skills' => [
+        'direct_damage', 'area_damage', 'execute', 'lifesteal',
+        'bleed', 'poison', 'counterattack', 'summon',
+    ],
+    'skill_offense_ratio' => 0.7,
+    'skill_offense_base' => 0.4,
 
     // Per-family skill parameter baselines.
     'skill_defaults' => [
