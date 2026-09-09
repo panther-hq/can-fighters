@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArenaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CanController;
 use App\Http\Controllers\EquipmentController;
@@ -92,4 +93,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('pve/stages', [PveController::class, 'stages']);
     Route::post('pve/stages/{stage:slug}/battle', [PveController::class, 'battle']);
     Route::get('pve/battles/{battle}', [PveController::class, 'battleShow']);
+
+    Route::get('arena', [ArenaController::class, 'show']);
+    Route::put('arena/defense-team', [ArenaController::class, 'setDefenseTeam']);
+    Route::get('arena/opponents', [ArenaController::class, 'opponents']);
+    Route::get('arena/ranking', [ArenaController::class, 'ranking']);
+    Route::get('arena/history', [ArenaController::class, 'history']);
+    Route::post('arena/challenge/{player}', [ArenaController::class, 'challenge']);
 });

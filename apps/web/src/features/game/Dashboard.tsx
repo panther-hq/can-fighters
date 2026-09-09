@@ -4,12 +4,21 @@ import { useLogout } from '../auth/useAuth'
 import { FightersView } from '../fighters/FightersView'
 import { CansView } from '../inventory/CansView'
 import { InventoryView } from '../inventory/InventoryView'
+import { ArenaView } from '../arena/ArenaView'
 import { MixerView } from '../mixer/MixerView'
 import { CampaignView } from '../pve/CampaignView'
 import { TeamView } from '../teams/TeamView'
 import { useBootstrap } from './useBootstrap'
 
-type Tab = 'panel' | 'cans' | 'inventory' | 'mixer' | 'fighters' | 'team' | 'campaign'
+type Tab =
+  | 'panel'
+  | 'cans'
+  | 'inventory'
+  | 'mixer'
+  | 'fighters'
+  | 'team'
+  | 'campaign'
+  | 'arena'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'panel', label: 'Panel' },
@@ -19,6 +28,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'fighters', label: 'Wojownicy' },
   { id: 'team', label: 'Drużyna' },
   { id: 'campaign', label: 'Kampania' },
+  { id: 'arena', label: 'Arena' },
 ]
 
 export function Dashboard({ user }: { user: AuthUser }) {
@@ -64,6 +74,7 @@ export function Dashboard({ user }: { user: AuthUser }) {
       {tab === 'fighters' && <FightersView />}
       {tab === 'team' && <TeamView />}
       {tab === 'campaign' && <CampaignView />}
+      {tab === 'arena' && <ArenaView />}
     </div>
   )
 }
@@ -120,6 +131,12 @@ function PanelTab({ user }: { user: AuthUser }) {
               <span>Kampania</span>
               <span>
                 {bootstrap.data.pve.stagesCleared}/{bootstrap.data.pve.stagesTotal}
+              </span>
+            </li>
+            <li>
+              <span>Arena</span>
+              <span>
+                {bootstrap.data.arena.league} · {bootstrap.data.arena.rating}
               </span>
             </li>
             <li>

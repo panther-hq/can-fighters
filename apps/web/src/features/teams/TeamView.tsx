@@ -2,7 +2,7 @@ import { isAxiosError } from 'axios'
 import { useState } from 'react'
 import { useFighters } from '../fighters/hooks'
 import { classLabel } from '../fighters/types'
-import { useSaveTeam, useTeam } from './hooks'
+import { type TeamType, useSaveTeam, useTeam } from './hooks'
 import { POSITIONS, type Team, type TeamPosition } from './types'
 
 type Slots = Partial<Record<TeamPosition, number>>
@@ -20,10 +20,10 @@ function errorText(error: unknown): string {
   return 'Nie udało się zapisać drużyny.'
 }
 
-export function TeamView() {
-  const team = useTeam()
+export function TeamView({ type = 'campaign' }: { type?: TeamType }) {
+  const team = useTeam(type)
   const fighters = useFighters()
-  const save = useSaveTeam()
+  const save = useSaveTeam(type)
 
   // Local edits override the saved roster once the user touches something.
   const [edited, setEdited] = useState<Slots | null>(null)

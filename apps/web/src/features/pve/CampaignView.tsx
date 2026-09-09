@@ -17,7 +17,57 @@ export function CampaignView() {
   const [outcome, setOutcome] = useState<FightOutcome | null>(null)
 
   if (outcome) {
-    return <BattleReplay outcome={outcome} onDone={() => setOutcome(null)} />
+    const { rewards } = outcome
+    return (
+      <BattleReplay
+        events={outcome.result.events}
+        won={outcome.won}
+        onDone={() => setOutcome(null)}
+      >
+        {outcome.won && (
+          <>
+            <p className="result__stars">
+              {'★'.repeat(outcome.stars)}
+              {'☆'.repeat(3 - outcome.stars)}
+            </p>
+            <ul className="result__rewards">
+              <li>
+                <span>Monety</span>
+                <span>+{rewards.coins}</span>
+              </li>
+              <li>
+                <span>Dośw.</span>
+                <span>+{rewards.xp}</span>
+              </li>
+              {rewards.ingredients.map((item) => (
+                <li key={item.slug}>
+                  <span>
+                    {item.icon} {item.name}
+                  </span>
+                  <span>+{item.quantity}</span>
+                </li>
+              ))}
+              {rewards.cans.map((item) => (
+                <li key={item.slug}>
+                  <span>
+                    {item.icon} {item.name}
+                  </span>
+                  <span>+{item.quantity}</span>
+                </li>
+              ))}
+              {rewards.equipment.map((item) => (
+                <li key={item.id}>
+                  <span>
+                    {item.icon} {item.name}
+                  </span>
+                  <span>nowy</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </BattleReplay>
+    )
   }
 
   if (stages.isLoading) {

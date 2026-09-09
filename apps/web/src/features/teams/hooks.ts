@@ -2,28 +2,36 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api'
 import type { Team, TeamPosition } from './types'
 
-export function useTeam() {
+export type TeamType = 'campaign' | 'defense'
+
+export function useTeam(type: TeamType = 'campaign') {
   return useQuery({
-    queryKey: ['team'],
+    queryKey: ['team', type],
     queryFn: async (): Promise<Team | null> => {
-      const { data } = await api.get<{ team: Team | null }>('/teams')
-      return data.team
+      if (type === 'campaign') {
+        const { data } = await api.get<{ team: Team | null }>('/teams')
+        return data.team
+      }
+      const { data } = await api.get<{ defenseTeam: Team | null }>('/arena')
+      return data.defenseTeam
     },
   })
 }
 
-export function useSaveTeam() {
+export function useSaveTeam(type: TeamType = 'campaign') {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (
       members: { fighterId: number; position: TeamPosition }[],
     ): Promise<Team> => {
-      const { data } = await api.put<{ team: Team }>('/teams', { members })
+      const url = type === 'campaign' ? '/teams' : '/arena/defense-team'
+      const { data } = await api.put<{ team: Team }>(url, { members })
       return data.team
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['team'] })
+      queryClient.invalidateQueries({ queryKey: ['team', type] })
       queryClient.invalidateQueries({ queryKey: ['bootstrap'] })
+      queryClient.invalidateQueries({ queryKey: ['arena'] })
     },
   })
 }

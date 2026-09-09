@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Arena\LeagueTable;
 use App\Http\Resources\PlayerCanResource;
 use App\Http\Resources\PlayerProfileResource;
 use App\Http\Resources\TeamResource;
@@ -21,13 +22,13 @@ class GameController extends Controller
         $user = $request->user()->load([
             'playerProfile',
             'cans.definition',
-            'teams' => fn ($q) => $q->where('type', 'campaign')->with('members.fighter.stats'),
+            'teams.members.fighter.stats',
         ]);
         $profile = $user->playerProfile;
         $team = $user->teams->firstWhere('type', 'campaign');
+        $defense = $user->teams->firstWhere('type', 'defense');
 
-        $stagesTotal = PveStageDefinition::count();
-        $stagesCleared = $user->stageProgress()->where('stars', '>=', 1)->count();
+        $rating = (int) ($profile->rating ?? 1000);
 
         return response()->json([
             'player' => [
@@ -40,7 +41,15 @@ class GameController extends Controller
             ],
             'team' => $team ? TeamResource::make($team)->resolve() : null,
             'cans' => PlayerCanResource::collection($user->cans),
-            'pve' => ['stagesCleared' => $stagesCleared, 'stagesTotal' => $stagesTotal],
+            'pve' => [
+                'stagesCleared' => $user->stageProgress()->where('stars', '>=', 1)->count(),
+                'stagesTotal' => PveStageDefinition::count(),
+            ],
+            'arena' => [
+                'rating' => $rating,
+                'league' => LeagueTable::forRating($rating),
+                'defenseSet' => $defense !== null && $defense->members->isNotEmpty(),
+            ],
             'notifications' => [],
             'serverTime' => now()->toIso8601String(),
         ]);

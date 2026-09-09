@@ -1,14 +1,20 @@
 import type Phaser from 'phaser'
-import { useEffect, useRef, useState } from 'react'
-import type { FightOutcome } from '../pve/types'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
+import type { BattleEvent } from '../pve/types'
 import { startBattleGame } from './BattleScene'
 
 export function BattleReplay({
-  outcome,
+  events,
+  won,
   onDone,
+  heading,
+  children,
 }: {
-  outcome: FightOutcome
+  events: BattleEvent[]
+  won: boolean
   onDone: () => void
+  heading?: string
+  children?: ReactNode
 }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const gameRef = useRef<Phaser.Game | null>(null)
@@ -20,7 +26,7 @@ export function BattleReplay({
     setFinished(false)
 
     const game = startBattleGame(hostRef.current, {
-      events: outcome.result.events,
+      events,
       speed: fast ? 120 : 430,
       onComplete: () => setFinished(true),
     })
@@ -30,9 +36,7 @@ export function BattleReplay({
       game.destroy(true)
       gameRef.current = null
     }
-  }, [outcome, fast])
-
-  const { rewards } = outcome
+  }, [events, fast])
 
   return (
     <div className="replay">
@@ -51,49 +55,11 @@ export function BattleReplay({
       </div>
 
       {finished && (
-        <div className={`result result--${outcome.won ? 'win' : 'lose'}`}>
+        <div className={`result result--${won ? 'win' : 'lose'}`}>
           <p className="result__title">
-            {outcome.won ? 'ZWYCIĘSTWO' : 'PORAŻKA'}
+            {won ? (heading ?? 'ZWYCIĘSTWO') : 'PORAŻKA'}
           </p>
-          {outcome.won && (
-            <>
-              <p className="result__stars">{'★'.repeat(outcome.stars)}{'☆'.repeat(3 - outcome.stars)}</p>
-              <ul className="result__rewards">
-                <li>
-                  <span>Monety</span>
-                  <span>+{rewards.coins}</span>
-                </li>
-                <li>
-                  <span>Dośw.</span>
-                  <span>+{rewards.xp}</span>
-                </li>
-                {rewards.ingredients.map((item) => (
-                  <li key={item.slug}>
-                    <span>
-                      {item.icon} {item.name}
-                    </span>
-                    <span>+{item.quantity}</span>
-                  </li>
-                ))}
-                {rewards.cans.map((item) => (
-                  <li key={item.slug}>
-                    <span>
-                      {item.icon} {item.name}
-                    </span>
-                    <span>+{item.quantity}</span>
-                  </li>
-                ))}
-                {rewards.equipment.map((item) => (
-                  <li key={item.id}>
-                    <span>
-                      {item.icon} {item.name}
-                    </span>
-                    <span>nowy</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+          {children}
           <button type="button" className="btn btn--primary" onClick={onDone}>
             Wróć
           </button>

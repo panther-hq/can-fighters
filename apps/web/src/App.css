@@ -916,3 +916,58 @@ code {
 .equip-picker {
   margin-top: 0.6rem;
 }
+
+/* --- arena --- */
+
+.arena__summary {
+  margin: 1.1rem 0 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.rank {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.rank__row {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  background: #1b222e;
+  font-size: 0.85rem;
+}
+
+.rank__row--me {
+  background: #1a2233;
+  border: 1px solid #3b6cff55;
+}
+
+.rank__pos {
+  color: #8b95a7;
+  font-weight: 700;
+}
+
+.rank__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank__rating {
+  font-weight: 700;
+}
+
+.kv .ok {
+  color: #43d17f;
+}
+.kv .bad {
+  color: #f16a6e;
+}

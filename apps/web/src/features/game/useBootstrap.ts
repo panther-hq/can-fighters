@@ -13,6 +13,7 @@ export interface Bootstrap {
   team: Team | null
   cans: PlayerCan[]
   pve: { stagesCleared: number; stagesTotal: number }
+  arena: { rating: number; league: string; defenseSet: boolean }
   notifications: unknown[]
   serverTime: string
 }

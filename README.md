@@ -8,14 +8,13 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 8 — Equipment** (Phases 0–7 done).
-Weapon / armor / accessory slots. `equipment_definitions` (15 items, absurd
-Polish names) roll into `player_equipment` with a seeded stat roll scaled by
-rarity. `POST /api/fighters/{id}/equip|unequip` re-runs the Balance Engine —
-gear adds flat bonuses *on top of* the budget-normalised block, so it is a
-real power gain. `GET /api/equipment`. PvE stages (and the boss, guaranteed)
-drop gear. SPA: equip UI in the fighter detail, gear list in Plecak, drops in
-the battle rewards.
+**Phase 9 — Async PvP Arena — MVP complete** (Phases 0–8 done).
+Set a defense team; challenge other players' defense teams while they're
+offline. Immutable team snapshots, backend-run battle, Elo rating + Polish
+leagues (Brąz → Puszkowa Legenda), opponent matchmaking by rating band,
+ranking + history, and `arena.defense_attacked` / `arena.rating_updated`
+broadcasts. This closes the spec §67 Definition of Done — a new player can go
+account → can → mix → team → equip → PvE → PvP end to end.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -185,10 +184,24 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 - SPA: `FighterEquipment` slot UI in the detail, gear section in Plecak,
   equipment in the battle-rewards overlay.
 
-**208 feature/unit tests** (+11: roller determinism/rarity, equip power gain,
-weapon-swap, move-between-fighters, unequip, ownership guards, boss drop).
+**Phase 9 — Async PvP Arena**
 
-## Next: Phase 9
+- `Domain\Arena\`: `Elo` (zero-sum, K=32, rating floor), `LeagueTable`
+  (rating → Polish league), `ChallengeOpponent` (atomic: snapshot both teams,
+  run BattleEngine, update both ratings, record `arena_results`, notify).
+- Reuses `teams` with `type='defense'` + `SaveTeam`; `battles`/`battle_snapshots`
+  from phase 7. `config/arena.php` holds every knob.
+- `GET /api/arena` (summary), `PUT /api/arena/defense-team`,
+  `GET /api/arena/opponents|ranking|history`,
+  `POST /api/arena/challenge/{player}` (Idempotency-Key).
+- SPA: `TeamView` parametrised by team type; `ArenaView` with Obrona / Walka /
+  Ranking / Historia panels; `BattleReplay` generalised (PvE + Arena share it).
 
-Async PvP Arena: defense team, immutable snapshots, backend battle, rating,
-history, opponent list, WebSocket notify. See spec §29–§30, §68.
+**237 feature/unit tests** (+15: Elo maths + leagues, defense team,
+opponents filtering, challenge win/rating/records, self-challenge + no-defense
+guards, idempotency, ranking + history).
+
+## Next: Phase 10
+
+Responsive polish: mobile/tablet/desktop layout, bottom nav, touch targets,
+loading/offline/reconnect states, Echo wiring for realtime. See spec §60–§61, §68.
