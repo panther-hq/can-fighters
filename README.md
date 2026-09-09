@@ -8,13 +8,13 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 5 — Balance Engine** (Phases 0–4 done).
-Stats are now normalised to a **Power Budget** (`base + rarity bonus`, level-
-scaled) so `power_score ≈ budget` — rarity is a small, predictable edge and
-classes stay comparable (spec §15). Each fighter carries a `pvp_legal` flag
-(`power_score ≤ budget × 1.10`). A `SkillParameterResolver` scales offensive
-skill power with the wielder's offence. `php artisan fighters:recompute-balance
-[--check]`. Everything tunable is in `config/balance.php`.
+**Phase 6 — Battle Engine** (Phases 0–5 done).
+`App\Domain\Battle\` — a pure, deterministic, backend-authoritative
+auto-battler. `BattleEngine::run($combatants, $seed)` → a winner + an ordered
+`events[]` stream (spec §34) that the frontend replays. Initiative by speed,
+per-class targeting (spec §21), a `SkillResolver` covering the skill families
+(damage / DoT / heal / shield / control / buffs), crits, counters, always
+terminates. No HTTP yet — PvE (phase 7) wires it up.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -148,9 +148,21 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 - `fighters:recompute-balance --check` audits power drift / legality.
 - SPA fighter detail shows `moc / budżet` and a PvP-illegal warning.
 
-**163 feature/unit tests** (incl. a class × rarity × level budget matrix).
+**Phase 6 — Battle Engine**
 
-## Next: Phase 6
+- `Domain\Battle\`: `BattleEngine` (initiative loop), `BattleState`,
+  `BattleUnit` (hp/shield/effects/cooldowns), `DamageCalculator`,
+  `TargetSelector` (spec §21), `SkillResolver` (per-family behaviour),
+  `FighterCombatants` (Fighter → `CombatantInput` snapshot).
+  ValueObjects: `CombatantInput`, `BattleEvent`, `BattleResult`.
+- Deterministic: same combatants + seed → identical event stream.
+- `docs/BATTLE.md` documents the model + event types.
 
-Battle Engine: deterministic seed, basic attacks, skills, targeting, damage,
-healing, effects, ordered battle events. See spec §32–§35, §69, §68.
+**187 feature/unit tests** (+24: determinism, outcome, death, speed order,
+event ordering, damage/defense/crit, targeting incl. taunt, heal/shield/stun/
+poison/buff/debuff/lifesteal).
+
+## Next: Phase 7
+
+PvE: Kitchen region, stages, a boss, rewards, and the Phaser battle view that
+replays `events`. See spec §6, §27, §34, §68.
