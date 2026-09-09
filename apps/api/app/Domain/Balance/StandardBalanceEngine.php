@@ -20,9 +20,10 @@ class StandardBalanceEngine
 
     public function apply(Fighter $fighter): void
     {
-        $fighter->loadMissing('skills');
+        $fighter->loadMissing(['skills', 'equipment.playerEquipment']);
 
         $stats = $this->stats($fighter);
+        $stats = $this->withEquipment($stats, $fighter);
         $fighter->stats()->updateOrCreate([], $stats);
 
         foreach ($fighter->skills as $skill) {
@@ -30,6 +31,30 @@ class StandardBalanceEngine
                 'parameters' => $this->skills->resolve($skill->skill_family, $skill->level, $stats),
             ]);
         }
+    }
+
+    /**
+     * Gear adds flat bonuses on top of the budget-normalised block, so a
+     * geared fighter is genuinely stronger (spec §23). `pvp_legal` keeps
+     * tracking the base block — equipment does not make a fighter illegal.
+     *
+     * @param  array<string, int|bool>  $stats
+     * @return array<string, int|bool>
+     */
+    private function withEquipment(array $stats, Fighter $fighter): array
+    {
+        foreach ($fighter->equipment as $slot) {
+            foreach ($slot->playerEquipment->rolled_stats ?? [] as $key => $value) {
+                if (isset($stats[$key])) {
+                    $stats[$key] += (int) $value;
+                }
+            }
+        }
+
+        $stats['crit'] = min((int) $stats['crit'], (int) config('balance.crit_cap'));
+        $stats['power_score'] = $this->powerScore($stats);
+
+        return $stats;
     }
 
     /**

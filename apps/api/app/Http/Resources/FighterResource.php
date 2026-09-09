@@ -47,6 +47,14 @@ class FighterResource extends JsonResource
                 'level' => $skill->level,
                 'parameters' => $skill->parameters,
             ])),
+            'equipment' => $this->whenLoaded('equipment', fn () => $this->equipment->map(fn ($worn) => [
+                'slot' => $worn->slot,
+                'playerEquipmentId' => $worn->player_equipment_id,
+                'name' => $worn->playerEquipment->definition->name,
+                'icon' => $worn->playerEquipment->definition->icon,
+                'rarity' => $worn->playerEquipment->rarity,
+                'rolledStats' => $worn->playerEquipment->rolled_stats,
+            ])->values()),
             'createdAt' => $this->created_at?->toIso8601String(),
         ];
     }

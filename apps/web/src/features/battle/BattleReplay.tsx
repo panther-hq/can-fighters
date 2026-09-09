@@ -83,6 +83,14 @@ export function BattleReplay({
                     <span>+{item.quantity}</span>
                   </li>
                 ))}
+                {rewards.equipment.map((item) => (
+                  <li key={item.id}>
+                    <span>
+                      {item.icon} {item.name}
+                    </span>
+                    <span>nowy</span>
+                  </li>
+                ))}
               </ul>
             </>
           )}

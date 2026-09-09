@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\CanDefinition;
+use App\Models\EquipmentDefinition;
 use App\Models\IngredientDefinition;
 use Illuminate\Database\Seeder;
 
@@ -24,6 +25,39 @@ class GameContentSeeder extends Seeder
         foreach ($this->cans() as $can) {
             CanDefinition::updateOrCreate(['slug' => $can['slug']], $can);
         }
+
+        foreach ($this->equipment() as $item) {
+            EquipmentDefinition::updateOrCreate(['slug' => $item['slug']], $item);
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function equipment(): array
+    {
+        return [
+            // weapons
+            ['slug' => 'stefan-fork', 'name' => 'Widelec Stefana', 'icon' => '🍴', 'slot' => 'weapon', 'rarity' => 'common', 'base_stats' => ['attack' => 12, 'crit' => 4], 'special' => 'Przebicie'],
+            ['slug' => 'tin-sword', 'name' => 'Blaszany Miecz', 'icon' => '🗡️', 'slot' => 'weapon', 'rarity' => 'common', 'base_stats' => ['attack' => 14, 'defense' => 3]],
+            ['slug' => 'electro-beater', 'name' => 'Elektryczny Trzepak', 'icon' => '⚡', 'slot' => 'weapon', 'rarity' => 'common', 'base_stats' => ['magic' => 13, 'speed' => 3]],
+            ['slug' => 'sock-mace', 'name' => 'Skarpeta na Kiju', 'icon' => '🧦', 'slot' => 'weapon', 'rarity' => 'common', 'base_stats' => ['attack' => 9, 'speed' => 4]],
+            ['slug' => 'soup-ladle', 'name' => 'Wielka Chochla', 'icon' => '🥄', 'slot' => 'weapon', 'rarity' => 'common', 'base_stats' => ['attack' => 10, 'hp' => 18]],
+
+            // armor
+            ['slug' => 'can-armor', 'name' => 'Pancerz z Puszki', 'icon' => '🥫', 'slot' => 'armor', 'rarity' => 'common', 'base_stats' => ['hp' => 42, 'defense' => 12]],
+            ['slug' => 'grandma-lid', 'name' => 'Pokrywka Babci', 'icon' => '🛡️', 'slot' => 'armor', 'rarity' => 'common', 'base_stats' => ['defense' => 14, 'hp' => 12]],
+            ['slug' => 'cardboard-vest', 'name' => 'Karton Ochronny', 'icon' => '📦', 'slot' => 'armor', 'rarity' => 'common', 'base_stats' => ['hp' => 36, 'defense' => 6]],
+            ['slug' => 'bubble-wrap', 'name' => 'Folia Bąbelkowa', 'icon' => '🫧', 'slot' => 'armor', 'rarity' => 'common', 'base_stats' => ['hp' => 24, 'defense' => 10]],
+            ['slug' => 'chef-apron', 'name' => 'Fartuch Szefa', 'icon' => '🥼', 'slot' => 'armor', 'rarity' => 'common', 'base_stats' => ['defense' => 9, 'magic' => 8]],
+
+            // accessories
+            ['slug' => 'lucky-magnet', 'name' => 'Magnes Szczęścia', 'icon' => '🧲', 'slot' => 'accessory', 'rarity' => 'common', 'base_stats' => ['crit' => 6, 'speed' => 3]],
+            ['slug' => 'shaman-sock', 'name' => 'Śmierdząca Skarpeta Szamana', 'icon' => '🧦', 'slot' => 'accessory', 'rarity' => 'common', 'base_stats' => ['magic' => 10, 'speed' => 2], 'special' => 'Moc Osłabień'],
+            ['slug' => 'spare-battery', 'name' => 'Bateria Zapasowa', 'icon' => '🔋', 'slot' => 'accessory', 'rarity' => 'common', 'base_stats' => ['speed' => 5, 'magic' => 5]],
+            ['slug' => 'spring-boots', 'name' => 'Sprężynowe Buty', 'icon' => '🌀', 'slot' => 'accessory', 'rarity' => 'common', 'base_stats' => ['speed' => 7]],
+            ['slug' => 'coffee-mug', 'name' => 'Kubek Kawy', 'icon' => '☕', 'slot' => 'accessory', 'rarity' => 'common', 'base_stats' => ['speed' => 4, 'crit' => 3]],
+        ];
     }
 
     /**

@@ -865,3 +865,54 @@ code {
   border-radius: 0.45rem;
   background: #1b222e;
 }
+
+/* --- backpack --- */
+
+.backpack__head {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* --- fighter equipment --- */
+
+.equip-slots {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.equip-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.6rem;
+  font-size: 0.83rem;
+}
+
+.equip-slot__label {
+  width: 4.5rem;
+  color: #8b95a7;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.equip-slot__body {
+  flex: 1;
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.equip-slot .btn {
+  margin-left: auto;
+}
+
+.equip-picker {
+  margin-top: 0.6rem;
+}

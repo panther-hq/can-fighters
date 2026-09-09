@@ -30,14 +30,14 @@ class PveKitchenSeeder extends Seeder
         return [
             $this->stage('kitchen-1', 1, 'Kuchenny Bałagan', 68, [$spoon('front'), $fly('back')], ['coins' => 45, 'xp' => 20, 'fighterXp' => 15]),
             $this->stage('kitchen-2', 2, 'Szuflada z Widelcami', 76, [$spoon('front'), $fork('middle'), $fork('back')], ['coins' => 60, 'xp' => 26, 'fighterXp' => 18]),
-            $this->stage('kitchen-3', 3, 'Serowa Kałuża', 85, [$slime('front'), $fork('middle'), $fly('back')], ['coins' => 75, 'xp' => 32, 'fighterXp' => 22, 'canDrops' => [['slug' => 'rusty', 'chance' => 20]]]),
-            $this->stage('kitchen-4', 4, 'Nocna Zmiana', 94, [$slime('front'), $spoon('middle'), $fork('back')], ['coins' => 90, 'xp' => 38, 'fighterXp' => 26, 'canDrops' => [['slug' => 'rusty', 'chance' => 30]]]),
-            $this->stage('kitchen-5', 5, 'Gorący Piec', 104, [$slime('front'), $fork('middle'), $fly('back')], ['coins' => 105, 'xp' => 45, 'fighterXp' => 30, 'canDrops' => [['slug' => 'rusty', 'chance' => 40]]]),
+            $this->stage('kitchen-3', 3, 'Serowa Kałuża', 85, [$slime('front'), $fork('middle'), $fly('back')], ['coins' => 75, 'xp' => 32, 'fighterXp' => 22, 'canDrops' => [['slug' => 'rusty', 'chance' => 20]], 'equipmentDrops' => [['slug' => 'cardboard-vest', 'chance' => 25, 'rarity' => 'common']]]),
+            $this->stage('kitchen-4', 4, 'Nocna Zmiana', 94, [$slime('front'), $spoon('middle'), $fork('back')], ['coins' => 90, 'xp' => 38, 'fighterXp' => 26, 'canDrops' => [['slug' => 'rusty', 'chance' => 30]], 'equipmentDrops' => [['slug' => 'sock-mace', 'chance' => 30, 'rarity' => 'uncommon']]]),
+            $this->stage('kitchen-5', 5, 'Gorący Piec', 104, [$slime('front'), $fork('middle'), $fly('back')], ['coins' => 105, 'xp' => 45, 'fighterXp' => 30, 'canDrops' => [['slug' => 'rusty', 'chance' => 40]], 'equipmentDrops' => [['slug' => 'grandma-lid', 'chance' => 40, 'rarity' => 'uncommon']]]),
             $this->stage('kitchen-boss', 6, 'Szef Patelnia', 132, [
                 ['name' => 'Szef Patelnia', 'class' => 'tank', 'position' => 'front'],
                 $fork('middle'),
                 $fly('back'),
-            ], ['coins' => 160, 'xp' => 70, 'fighterXp' => 45, 'canDrops' => [['slug' => 'rusty', 'chance' => 100]]], isBoss: true),
+            ], ['coins' => 160, 'xp' => 70, 'fighterXp' => 45, 'canDrops' => [['slug' => 'rusty', 'chance' => 100]], 'equipmentDrops' => [['slug' => 'stefan-fork', 'chance' => 100, 'rarity' => 'rare']]], isBoss: true),
         ];
     }
 
@@ -67,6 +67,7 @@ class PveKitchenSeeder extends Seeder
                     ['slug' => 'fork', 'chance' => 20, 'min' => 1, 'max' => 1],
                 ],
                 'canDrops' => [],
+                'equipmentDrops' => [],
             ], $rewards),
         ];
     }

@@ -59,4 +59,12 @@ class Fighter extends Model
     {
         return $this->hasMany(FighterSkill::class)->orderBy('slot');
     }
+
+    /**
+     * @return HasMany<FighterEquipment, $this>
+     */
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(FighterEquipment::class);
+    }
 }

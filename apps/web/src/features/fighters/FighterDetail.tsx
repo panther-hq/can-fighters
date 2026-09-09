@@ -1,5 +1,6 @@
 import { isAxiosError } from 'axios'
 import { useState } from 'react'
+import { FighterEquipment } from '../equipment/FighterEquipment'
 import { useInventory } from '../inventory/hooks'
 import type { MixIngredient } from '../mixer/types'
 import { useMutateFighter, useUpgradeFighter } from './hooks'
@@ -121,6 +122,8 @@ export function FighterDetail({
           {errorText(upgrade.error, 'Nie udało się ulepszyć.')}
         </p>
       )}
+
+      <FighterEquipment fighter={fighter} />
 
       <section className="detail__mutate">
         <h3>Mutacja</h3>

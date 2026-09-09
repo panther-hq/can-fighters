@@ -96,4 +96,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(PlayerStageProgress::class);
     }
+
+    /**
+     * @return HasMany<PlayerEquipment, $this>
+     */
+    public function equipment(): HasMany
+    {
+        return $this->hasMany(PlayerEquipment::class);
+    }
 }

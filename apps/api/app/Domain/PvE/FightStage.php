@@ -7,8 +7,10 @@ use App\Domain\Battle\BattleEngine;
 use App\Domain\Battle\FighterCombatants;
 use App\Domain\Battle\ValueObjects\BattleResult;
 use App\Domain\Battle\ValueObjects\CombatantInput;
+use App\Domain\Equipment\EquipmentRoller;
 use App\Models\Battle;
 use App\Models\CanDefinition;
+use App\Models\EquipmentDefinition;
 use App\Models\IngredientDefinition;
 use App\Models\PlayerProfile;
 use App\Models\PveStageDefinition;
@@ -33,6 +35,7 @@ class FightStage
         private FighterCombatants $fighterCombatants,
         private EnemyCombatants $enemyCombatants,
         private StandardBalanceEngine $balance,
+        private EquipmentRoller $equipmentRoller,
     ) {}
 
     /**
@@ -73,7 +76,7 @@ class FightStage
 
             $won = $result->winner === 'A';
             $stars = 0;
-            $rewards = ['coins' => 0, 'xp' => 0, 'ingredients' => [], 'cans' => []];
+            $rewards = ['coins' => 0, 'xp' => 0, 'ingredients' => [], 'cans' => [], 'equipment' => []];
 
             if ($won) {
                 $stars = $this->stars($result, count($teamA));
@@ -129,7 +132,7 @@ class FightStage
     }
 
     /**
-     * @return array{coins: int, xp: int, ingredients: list<array<string, mixed>>, cans: list<array<string, mixed>>}
+     * @return array{coins: int, xp: int, ingredients: list<array<string, mixed>>, cans: list<array<string, mixed>>, equipment: list<array<string, mixed>>}
      */
     private function grantRewards(User $user, PveStageDefinition $stage, int $seed): array
     {
@@ -173,7 +176,39 @@ class FightStage
             $cans[] = ['slug' => $definition->slug, 'name' => $definition->name, 'icon' => $definition->icon, 'quantity' => 1];
         }
 
-        return ['coins' => (int) $rewards['coins'], 'xp' => (int) $rewards['xp'], 'ingredients' => $ingredients, 'cans' => $cans];
+        $equipment = [];
+        foreach ($rewards['equipmentDrops'] ?? [] as $drop) {
+            if ($rng->int(100) >= (int) $drop['chance']) {
+                continue;
+            }
+            $definition = EquipmentDefinition::firstWhere('slug', $drop['slug']);
+            if ($definition === null) {
+                continue;
+            }
+            $piece = $this->equipmentRoller->roll(
+                $user,
+                $definition,
+                $drop['rarity'] ?? 'common',
+                $seed ^ (0x9E3779B9 + count($equipment)),
+            );
+            $equipment[] = [
+                'id' => $piece->id,
+                'slug' => $definition->slug,
+                'name' => $definition->name,
+                'icon' => $definition->icon,
+                'slot' => $definition->slot,
+                'rarity' => $piece->rarity,
+                'rolledStats' => $piece->rolled_stats,
+            ];
+        }
+
+        return [
+            'coins' => (int) $rewards['coins'],
+            'xp' => (int) $rewards['xp'],
+            'ingredients' => $ingredients,
+            'cans' => $cans,
+            'equipment' => $equipment,
+        ];
     }
 
     private function levelUpAccount(PlayerProfile $profile): void

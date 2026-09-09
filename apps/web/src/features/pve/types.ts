@@ -40,6 +40,7 @@ export interface RewardBundle {
   xp: number
   ingredients: { slug: string; name: string; icon: string; quantity: number }[]
   cans: { slug: string; name: string; icon: string; quantity: number }[]
+  equipment: { id: number; slug: string; name: string; icon: string; rarity: string }[]
 }
 
 export interface FightOutcome {

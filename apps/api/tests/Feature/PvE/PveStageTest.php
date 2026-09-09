@@ -125,6 +125,22 @@ class PveStageTest extends TestCase
         $this->assertDatabaseCount('battles', 1);
     }
 
+    public function test_the_boss_drops_equipment(): void
+    {
+        $user = $this->playerWithTeam(3, ['rarity' => 'legendary', 'level' => 12]);
+        foreach (['kitchen-1', 'kitchen-2', 'kitchen-3', 'kitchen-4', 'kitchen-5'] as $slug) {
+            $user->stageProgress()->create(['stage_slug' => $slug, 'stars' => 3, 'cleared_at' => now()]);
+        }
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/pve/stages/kitchen-boss/battle')
+            ->assertOk()
+            ->assertJsonPath('won', true);
+
+        $this->assertNotEmpty($response->json('rewards.equipment'));
+        $this->assertDatabaseHas('player_equipment', ['user_id' => $user->id]);
+    }
+
     public function test_a_stored_battle_can_be_replayed(): void
     {
         $user = $this->playerWithTeam(3, ['rarity' => 'legendary', 'level' => 10]);

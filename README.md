@@ -8,14 +8,14 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 7 — PvE** (Phases 0–6 done).
-The Kitchen region: 6 stages + a boss (spec §6), enemies statted from the
-class profiles at a per-stage budget. `POST /api/pve/stages/{slug}/battle`
-builds your campaign team vs the stage, runs the Battle Engine, persists the
-battle + snapshots, and on a win grants coins/xp, rolled ingredient/can drops,
-fighter XP (with level-ups) and star progress that unlocks the next stage.
-`GET /api/pve/stages`, `GET /api/pve/battles/{id}` (replay). SPA gets a
-**Kampania** tab and a **Phaser** battle replay that plays the event stream.
+**Phase 8 — Equipment** (Phases 0–7 done).
+Weapon / armor / accessory slots. `equipment_definitions` (15 items, absurd
+Polish names) roll into `player_equipment` with a seeded stat roll scaled by
+rarity. `POST /api/fighters/{id}/equip|unequip` re-runs the Balance Engine —
+gear adds flat bonuses *on top of* the budget-normalised block, so it is a
+real power gain. `GET /api/equipment`. PvE stages (and the boss, guaranteed)
+drop gear. SPA: equip UI in the fighter detail, gear list in Plecak, drops in
+the battle rewards.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -171,10 +171,24 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
   and `BattleReplay` + a Phaser `BattleScene` that replays `events` (HP bars,
   floating damage, lunges, skill/effect labels) with a result + rewards overlay.
 
-**197 feature/unit tests** (+10: stage lock/unlock, win rewards + progress +
-fighter XP, loss grants nothing, 403 locked, 422 no team, idempotency, replay).
+**Phase 8 — Equipment**
 
-## Next: Phase 8
+- `equipment_definitions` + 15 seeded items; `player_equipment` (seeded roll,
+  rarity multiplier + ±10% variance — deterministic); `fighter_equipment`
+  (one piece per slot, one wearer per piece).
+- `Domain\Equipment\EquipmentRoller` + `EquipFighter` (equip / unequip,
+  atomic, moves a piece off its old wearer, re-runs the Balance Engine).
+- `StandardBalanceEngine` adds equipment bonuses after budget normalisation;
+  `pvp_legal` still tracks the base block.
+- PvE `equipmentDrops` (boss guaranteed) via `EquipmentRoller`.
+- `GET /api/equipment`, `POST /api/fighters/{id}/equip|unequip`.
+- SPA: `FighterEquipment` slot UI in the detail, gear section in Plecak,
+  equipment in the battle-rewards overlay.
 
-Equipment: weapon/armor/accessory slots, rolled stats, equip/unequip, stat
-contribution into the Balance Engine. See spec §23–§26, §68.
+**208 feature/unit tests** (+11: roller determinism/rarity, equip power gain,
+weapon-swap, move-between-fighters, unequip, ownership guards, boss drop).
+
+## Next: Phase 9
+
+Async PvP Arena: defense team, immutable snapshots, backend battle, rating,
+history, opponent list, WebSocket notify. See spec §29–§30, §68.

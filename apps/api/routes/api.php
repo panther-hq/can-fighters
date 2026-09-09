@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CanController;
+use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\FighterController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\IngredientController;
@@ -80,6 +81,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fighters/{fighter}', [FighterController::class, 'show']);
     Route::post('fighters/{fighter}/upgrade', [FighterController::class, 'upgrade']);
     Route::post('fighters/{fighter}/mutate', [FighterController::class, 'mutate']);
+    Route::post('fighters/{fighter}/equip', [FighterController::class, 'equip']);
+    Route::post('fighters/{fighter}/unequip', [FighterController::class, 'unequip']);
+
+    Route::get('equipment', [EquipmentController::class, 'index']);
 
     Route::get('teams', [TeamController::class, 'show']);
     Route::put('teams', [TeamController::class, 'update']);

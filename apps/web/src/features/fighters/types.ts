@@ -23,6 +23,15 @@ export interface FighterSkill {
   parameters: Record<string, number>
 }
 
+export interface WornEquipment {
+  slot: 'weapon' | 'armor' | 'accessory'
+  playerEquipmentId: number
+  name: string
+  icon: string
+  rarity: string
+  rolledStats: Record<string, number>
+}
+
 export interface Fighter {
   id: number
   name: string
@@ -38,6 +47,7 @@ export interface Fighter {
   suggestedSkills: SuggestedSkill[]
   stats?: FighterStats
   skills?: FighterSkill[]
+  equipment?: WornEquipment[]
   createdAt: string | null
 }
 
