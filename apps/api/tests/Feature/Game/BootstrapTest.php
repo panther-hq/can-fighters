@@ -45,7 +45,7 @@ class BootstrapTest extends TestCase
                 'currencies' => ['coins' => 500],
                 'team' => null,
                 'cans' => [],
-                'pve' => ['stagesCleared' => 0, 'stagesTotal' => $response->json('pve.stagesTotal')],
+                'pve' => ['regionsCleared' => 0, 'regionsTotal' => $response->json('pve.regionsTotal'), 'onExpedition' => false],
                 'arena' => ['rating' => 1042, 'league' => 'Srebro', 'defenseSet' => false],
                 'daily' => ['canClaim' => true, 'streak' => 0],
                 'notifications' => [],

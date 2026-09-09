@@ -90,11 +90,11 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<PlayerStageProgress, $this>
+     * @return HasMany<PlayerRegionClear, $this>
      */
-    public function stageProgress(): HasMany
+    public function regionClears(): HasMany
     {
-        return $this->hasMany(PlayerStageProgress::class);
+        return $this->hasMany(PlayerRegionClear::class);
     }
 
     /**

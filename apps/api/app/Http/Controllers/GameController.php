@@ -7,7 +7,8 @@ use App\Domain\Economy\DailyReward;
 use App\Http\Resources\PlayerCanResource;
 use App\Http\Resources\PlayerProfileResource;
 use App\Http\Resources\TeamResource;
-use App\Models\PveStageDefinition;
+use App\Models\PlayerRegionRun;
+use App\Models\RegionDefinition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -44,8 +45,10 @@ class GameController extends Controller
             'team' => $team ? TeamResource::make($team)->resolve() : null,
             'cans' => PlayerCanResource::collection($user->cans),
             'pve' => [
-                'stagesCleared' => $user->stageProgress()->where('stars', '>=', 1)->count(),
-                'stagesTotal' => PveStageDefinition::count(),
+                'regionsCleared' => $user->regionClears()->where('times_cleared', '>=', 1)->count(),
+                'regionsTotal' => RegionDefinition::count(),
+                'onExpedition' => PlayerRegionRun::where('user_id', $user->id)
+                    ->where('status', 'active')->exists(),
             ],
             'arena' => [
                 'rating' => $rating,

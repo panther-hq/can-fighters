@@ -1178,3 +1178,143 @@ code {
 .card--spent {
   opacity: 0.5;
 }
+
+/* --- region picker --- */
+
+.regions {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.region {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.7rem;
+}
+
+.region--locked {
+  opacity: 0.55;
+}
+
+.region__info {
+  flex: 1;
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.88rem;
+}
+
+.region__name {
+  font-weight: 600;
+}
+
+/* --- run map --- */
+
+.runmap {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.runmap__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.runmap__boss {
+  text-align: center;
+  padding: 0.7rem;
+  border-radius: 0.7rem;
+  border: 1px dashed #3a4152;
+  color: #8b95a7;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.runmap__boss.is-live {
+  border: 1px solid #f5a623;
+  color: #f5c451;
+  background: #241d10;
+}
+
+.runmap__trail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
+  font-size: 1.05rem;
+  opacity: 0.7;
+}
+
+.runmap__prompt {
+  margin: 0.25rem 0 0;
+}
+
+.runmap__choices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.runmap__choice {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  background: #161c27;
+  border: 1px solid #3b6cff55;
+  border-radius: 0.7rem;
+  color: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.runmap__choice:hover:not(:disabled) {
+  background: #1a2233;
+}
+
+.runmap__choice:disabled {
+  opacity: 0.6;
+}
+
+.runmap__choice-icon {
+  font-size: 1.4rem;
+}
+
+.node-result {
+  margin-top: 1.25rem;
+  text-align: center;
+  display: grid;
+  gap: 0.9rem;
+  justify-items: center;
+  padding: 1.1rem;
+  border: 1px solid #232a38;
+  border-radius: 0.9rem;
+  background: #161c27;
+}
+
+.node-result__title {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.merchant h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.merchant .btn:last-child {
+  margin-top: 0.6rem;
+}

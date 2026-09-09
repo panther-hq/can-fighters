@@ -12,7 +12,7 @@ export interface Bootstrap {
   currencies: { coins: number }
   team: Team | null
   cans: PlayerCan[]
-  pve: { stagesCleared: number; stagesTotal: number }
+  pve: { regionsCleared: number; regionsTotal: number; onExpedition: boolean }
   arena: { rating: number; league: string; defenseSet: boolean }
   daily: { canClaim: boolean; streak: number }
   notifications: unknown[]

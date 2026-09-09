@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['slug', 'region', 'name', 'order', 'is_boss', 'enemy_budget', 'enemies', 'rewards'])]
-class PveStageDefinition extends Model
+#[Fillable(['slug', 'name', 'order', 'enemy_budget', 'enemy_pool', 'boss', 'drops'])]
+class RegionDefinition extends Model
 {
     /**
      * @return array<string, string>
@@ -15,10 +15,10 @@ class PveStageDefinition extends Model
     {
         return [
             'order' => 'integer',
-            'is_boss' => 'boolean',
             'enemy_budget' => 'integer',
-            'enemies' => 'array',
-            'rewards' => 'array',
+            'enemy_pool' => 'array',
+            'boss' => 'array',
+            'drops' => 'array',
         ];
     }
 }

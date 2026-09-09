@@ -142,7 +142,9 @@ function PanelTab({ user }: { user: AuthUser }) {
             <li>
               <span>Kampania</span>
               <span>
-                {bootstrap.data.pve.stagesCleared}/{bootstrap.data.pve.stagesTotal}
+                {bootstrap.data.pve.onExpedition
+                  ? 'wyprawa w toku'
+                  : `regiony ${bootstrap.data.pve.regionsCleared}/${bootstrap.data.pve.regionsTotal}`}
               </span>
             </li>
             <li>

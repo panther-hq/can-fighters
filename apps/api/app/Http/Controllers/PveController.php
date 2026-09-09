@@ -2,60 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\PvE\FightStage;
+use App\Domain\PvE\RegionRun;
 use App\Models\Battle;
-use App\Models\PveStageDefinition;
+use App\Models\PlayerRegionRun;
+use App\Models\User;
 use App\Support\Idempotency;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PveController extends Controller
 {
-    /**
-     * Every stage with the player's progress + unlock state.
-     */
-    public function stages(Request $request): JsonResponse
-    {
-        $stages = PveStageDefinition::query()->orderBy('order')->get();
-        $progress = $request->user()->stageProgress()->get()->keyBy('stage_slug');
+    public function __construct(private RegionRun $regionRun) {}
 
-        $data = $stages->map(function (PveStageDefinition $stage) use ($stages, $progress) {
-            $previous = $stages->firstWhere('order', $stage->order - 1);
-            $unlocked = $stage->order <= 1
-                || ($previous !== null && (int) ($progress->get($previous->slug)->stars ?? 0) >= 1);
-
-            return [
-                'slug' => $stage->slug,
-                'region' => $stage->region,
-                'name' => $stage->name,
-                'order' => $stage->order,
-                'isBoss' => $stage->is_boss,
-                'enemies' => $stage->enemies,
-                'rewards' => [
-                    'coins' => (int) $stage->rewards['coins'],
-                    'xp' => (int) $stage->rewards['xp'],
-                ],
-                'stars' => (int) ($progress->get($stage->slug)->stars ?? 0),
-                'cleared' => (int) ($progress->get($stage->slug)->stars ?? 0) >= 1,
-                'unlocked' => $unlocked,
-            ];
-        });
-
-        return response()->json(['stages' => $data]);
-    }
-
-    /**
-     * Fight a stage. `Idempotency-Key` stops a retry double-rewarding.
-     */
-    public function battle(Request $request, PveStageDefinition $stage): JsonResponse
+    public function regions(Request $request): JsonResponse
     {
         $user = $request->user();
+        $active = $this->regionRun->activeRun($user);
+
+        return response()->json([
+            'regions' => $this->regionRun->regions($user),
+            'run' => $active ? $this->regionRun->view($active) : null,
+        ]);
+    }
+
+    public function startRun(Request $request, string $region): JsonResponse
+    {
+        $run = $this->regionRun->start($request->user(), $region);
+
+        return response()->json(['run' => $this->regionRun->view($run)]);
+    }
+
+    public function run(Request $request): JsonResponse
+    {
+        $active = $this->regionRun->activeRun($request->user());
+
+        return response()->json(['run' => $active ? $this->regionRun->view($active) : null]);
+    }
+
+    public function visitNode(Request $request, string $node): JsonResponse
+    {
+        $user = $request->user();
+        $run = $this->activeRunOr404($user);
 
         $outcome = Idempotency::run(
             $user,
-            "pve.stage.{$stage->slug}",
+            "pve.run.{$run->id}.{$node}",
             $request->header('Idempotency-Key'),
-            fn (): array => [200, app(FightStage::class)->fight($user, $stage)],
+            fn (): array => [200, $this->regionRun->visit($user, $run, $node)],
         );
 
         return response()
@@ -63,20 +56,49 @@ class PveController extends Controller
             ->header('Idempotency-Replayed', $outcome['replayed'] ? 'true' : 'false');
     }
 
-    /**
-     * A stored battle for replay (spec §35).
-     */
+    public function buy(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $run = $this->activeRunOr404($user);
+        $offer = $request->validate(['offerId' => ['required', 'string']])['offerId'];
+
+        return response()->json($this->regionRun->buyFromMerchant($user, $run, $offer));
+    }
+
+    public function advance(Request $request): JsonResponse
+    {
+        $run = $this->activeRunOr404($request->user());
+
+        return response()->json($this->regionRun->leaveMerchant($run));
+    }
+
+    public function abandon(Request $request): JsonResponse
+    {
+        $run = $this->regionRun->activeRun($request->user());
+        if ($run !== null) {
+            $this->regionRun->abandon($run);
+        }
+
+        return response()->json(['run' => null]);
+    }
+
     public function battleShow(Request $request, Battle $battle): JsonResponse
     {
         abort_unless($battle->player_a_id === $request->user()->id, 404);
 
         return response()->json([
             'battleId' => $battle->id,
-            'type' => $battle->type,
-            'stageSlug' => $battle->stage_slug,
             'seed' => $battle->seed,
             'winner' => $battle->winner,
             'result' => $battle->result,
         ]);
+    }
+
+    private function activeRunOr404(User $user): PlayerRegionRun
+    {
+        $run = $this->regionRun->activeRun($user);
+        abort_if($run === null, 404, 'Brak aktywnej wyprawy.');
+
+        return $run;
     }
 }

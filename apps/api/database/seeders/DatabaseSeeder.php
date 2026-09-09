@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             GameContentSeeder::class,
-            PveKitchenSeeder::class,
+            RegionSeeder::class,
         ]);
     }
 }
