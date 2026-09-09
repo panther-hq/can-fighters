@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import type { AuthUser } from '../auth/types'
 import { useLogout } from '../auth/useAuth'
+import { FightersView } from '../fighters/FightersView'
 import { CansView } from '../inventory/CansView'
 import { InventoryView } from '../inventory/InventoryView'
+import { MixerView } from '../mixer/MixerView'
 import { useBootstrap } from './useBootstrap'
 
-type Tab = 'panel' | 'cans' | 'inventory'
+type Tab = 'panel' | 'cans' | 'inventory' | 'mixer' | 'fighters'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'panel', label: 'Panel' },
   { id: 'cans', label: 'Puszki' },
   { id: 'inventory', label: 'Plecak' },
+  { id: 'mixer', label: 'Mikser' },
+  { id: 'fighters', label: 'Wojownicy' },
 ]
 
 export function Dashboard({ user }: { user: AuthUser }) {
@@ -52,6 +56,8 @@ export function Dashboard({ user }: { user: AuthUser }) {
       {tab === 'panel' && <PanelTab user={user} />}
       {tab === 'cans' && <CansView />}
       {tab === 'inventory' && <InventoryView />}
+      {tab === 'mixer' && <MixerView />}
+      {tab === 'fighters' && <FightersView />}
     </div>
   )
 }

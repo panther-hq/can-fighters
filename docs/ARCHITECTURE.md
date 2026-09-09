@@ -41,9 +41,17 @@ records decisions and their current state.
   (`can_openings.seed`). `Domain\Inventory\WeightedRoller` is a self-contained
   LCG — no dependency on PHP's global RNG state.
 - **Idempotency**: `Support\Idempotency::run($user, $scope, $key, $work)` +
-  `idempotency_keys`. Wraps economic actions; a repeated key replays the stored
-  response. Sequential-retry safe; concurrent same-key requests are further
-  serialised by the row locks inside each action.
+  `idempotency_keys`. Wraps economic actions (`cans.open`, `mixer.mix`); a
+  repeated key replays the stored response. Sequential-retry safe; concurrent
+  same-key requests are further serialised by the row locks inside each action.
+- **AI Mixer** (spec §8): the provider (`Domain\Mixer\CharacterGenerationProvider`)
+  only produces a creative concept; `ConceptValidator` forces it into legal
+  values; numbers are the Balance Engine's job (phase 5). Default provider is
+  the deterministic `Fallback` — a failing real provider retries once then
+  falls back, so generation never hard-fails the game (spec §49, §72 r19).
+- **Reverb hosts**: browser uses `REVERB_HOST` (`localhost:8080`); PHP →
+  Reverb uses `REVERB_INTERNAL_HOST` (`reverb:8080`, the compose service).
+  Broadcasting is best-effort — DB stays the source of truth (spec §70).
 - **Host runs nothing**: PHP/Composer/Node are container-only. The API image
   (`docker/api/Dockerfile`) is a PHP 8.4 CLI image with `pdo_pgsql` + `redis`,
   used for `artisan serve`, the queue worker and the Reverb server.

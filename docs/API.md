@@ -18,6 +18,19 @@ Planned MVP surface: spec §55. This file tracks what actually exists.
 | GET    | `/api/player/inventory`| session | `{ ingredients: [...], cans: [...] }`               |
 | GET    | `/api/cans`           | session | `{ data: [...] }` — the player's owned cans          |
 | POST   | `/api/cans/{can}/open`| session | Opens one can from that stack → `201 { openingId, seed, received[] }` |
+| POST   | `/api/mixer/preview`  | session | `{ ingredients: [{slug, quantity}] }` → `{ concept }` (no consumption) |
+| POST   | `/api/mixer/mix`      | session | Consumes ingredients, queues generation → `202 { mixId, status, fighter }` (Idempotency-Key) |
+| GET    | `/api/mixer/{mix}`    | session | `{ mixId, status, error, fighter }` — poll while `processing`         |
+| GET    | `/api/fighters`       | session | `{ data: [Fighter, …] }`                                             |
+| GET    | `/api/fighters/{fighter}` | session | one Fighter                                                     |
+
+Mixer flow (spec §8–§9, §47): `mix` validates + consumes ingredients (2–6 per
+mix), records a `mix_request`, dispatches `ProcessMixRequest`. The job asks the
+`CharacterGenerationProvider` for a concept, `ConceptValidator` legalises it,
+a `Fighter` is saved (no stats yet — Balance Engine is phase 5), and
+`MixerCompleted` broadcasts on `private-player.{id}` as `mixer.completed`.
+Provider = `fallback` (deterministic, always works) unless `MIXER_PROVIDER`
+says otherwise; a failing provider retries once then falls back (spec §49).
 
 `{can}` is a **player_cans id**. Send an `Idempotency-Key` header on `open`
 (spec §58): a retry with the same key replays the stored result without opening
@@ -67,12 +80,13 @@ matched by `Origin` against `SANCTUM_STATEFUL_DOMAINS`.
   "checks": { "database": true, "cache": true }, "time": "…" }
 ```
 
-## Next (Phase 3 — AI Mixer)
+## Next (Phase 4 — fighters & teams)
 
 ```
-POST /api/mixer/preview
-POST /api/mixer/mix          (queued; idempotency key)
-GET  /api/mixer/{mixId}
+GET  /api/fighters/{id}      (details incl. stats — after phase 5)
+POST /api/fighters/{id}/upgrade
+POST /api/fighters/{id}/mutate
+GET/POST/PUT /api/teams
 ```
 
 ## Conventions

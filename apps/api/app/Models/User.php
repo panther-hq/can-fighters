@@ -64,4 +64,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(CanOpening::class);
     }
+
+    /**
+     * @return HasMany<Fighter, $this>
+     */
+    public function fighters(): HasMany
+    {
+        return $this->hasMany(Fighter::class);
+    }
+
+    /**
+     * @return HasMany<MixRequest, $this>
+     */
+    public function mixRequests(): HasMany
+    {
+        return $this->hasMany(MixRequest::class);
+    }
 }

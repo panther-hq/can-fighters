@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CanController;
+use App\Http\Controllers\FighterController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\MixerController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -67,4 +69,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('cans', [CanController::class, 'index']);
     Route::post('cans/{can}/open', [CanController::class, 'open']);
+
+    Route::post('mixer/preview', [MixerController::class, 'preview']);
+    Route::post('mixer/mix', [MixerController::class, 'mix']);
+    Route::get('mixer/{mix}', [MixerController::class, 'show']);
+
+    Route::get('fighters', [FighterController::class, 'index']);
+    Route::get('fighters/{fighter}', [FighterController::class, 'show']);
 });

@@ -270,18 +270,19 @@ code {
 
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
   margin-top: 1.25rem;
 }
 
 .tabs button {
-  flex: 1;
-  padding: 0.55rem;
+  flex: 1 1 5rem;
+  padding: 0.55rem 0.4rem;
   background: #161c27;
   border: 1px solid #232a38;
   border-radius: 0.6rem;
   color: #8b95a7;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -396,4 +397,196 @@ code {
 .ingredient__qty {
   color: #b7c0d0;
   font-weight: 700;
+}
+
+/* --- mixer --- */
+
+.picker {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.picker__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.65rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.6rem;
+  font-size: 0.88rem;
+}
+
+.picker__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.picker__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepper button {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.45rem;
+  border: 1px solid #2c3444;
+  background: #1d2431;
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.stepper span {
+  min-width: 1.2rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.mixer__count {
+  margin: 0.9rem 0 0;
+}
+
+.mixer__preview {
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.55rem;
+  background: #1b222e;
+  font-size: 0.88rem;
+}
+
+.mixer__actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.mixer__actions .btn {
+  flex: 1;
+}
+
+.mixer-progress,
+.mixer-result {
+  margin-top: 1.5rem;
+  text-align: center;
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+}
+
+.mixer-progress__spinner {
+  font-size: 2.5rem;
+  display: inline-block;
+  animation: spin 1.1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mixer-result__banner {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #6fa8ff;
+}
+
+/* --- fighter card --- */
+
+.fighter-list {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+}
+
+.fighter {
+  border: 1px solid #232a38;
+  border-left: 3px solid #3b6cff;
+  border-radius: 0.8rem;
+  background: #161c27;
+  padding: 1rem 1.1rem;
+}
+
+.fighter--rare {
+  border-left-color: #3aa0ff;
+}
+.fighter--epic {
+  border-left-color: #b06cff;
+}
+.fighter--legendary {
+  border-left-color: #f5a623;
+}
+
+.fighter__head {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.fighter__avatar {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.fighter__name {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.fighter__meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: #8b95a7;
+}
+
+.fighter__rarity {
+  color: #b7c0d0;
+}
+
+.fighter__desc {
+  margin: 0.75rem 0;
+  font-size: 0.88rem;
+  color: #c8cfdb;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #232a38;
+  color: #b7c0d0;
+}
+
+.fighter__skills {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: #8b95a7;
 }

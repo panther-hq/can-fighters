@@ -8,11 +8,14 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 2 — ingredients & cans** (Phases 0–1 done).
-12 seeded ingredients + a starter can, `GET /api/ingredients`,
-`GET /api/player/inventory`, `GET /api/cans`, and `POST /api/cans/{can}/open`
-with `Idempotency-Key` replay protection. New players get 3 starter cans.
-The SPA has Panel / Puszki / Plecak tabs.
+**Phase 3 — AI Mixer** (Phases 0–2 done).
+Mix 2–6 ingredients into a persistent fighter. `POST /api/mixer/preview`,
+`POST /api/mixer/mix` (queued, idempotent), `GET /api/mixer/{id}`,
+`GET /api/fighters`. Concepts come from a `CharacterGenerationProvider`
+(deterministic `fallback` by default; retry → fallback on failure — spec §49),
+are legalised by `ConceptValidator`, saved as `Fighter` (stats come in phase 5),
+and `mixer.completed` broadcasts on `private-player.{id}`. SPA gains
+Mikser + Wojownicy tabs with a fighter reveal.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -111,9 +114,22 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 - SPA: Panel / Puszki / Plecak tabs; open-a-can with reveal; `Idempotency-Key`
   per request.
 
-**32 feature/unit tests.**
+**Phase 3 — AI Mixer**
 
-## Next: Phase 3
+- `Domain\Mixer\`: `CharacterGenerationProvider` interface + `Fallback`
+  (deterministic, `SeededRng` LCG) + `Mock` (tests); `ConceptValidator`
+  (allowed class / traits / skill families, normalise); `MixerService`
+  (resolve + consume ingredients atomically, generate, validate, persist,
+  announce). `ProcessMixRequest` job, `MixerCompleted` / `MixerFailed` events.
+- `fighters`, `mix_requests` tables; `config/mixer.php` (all pools + maps).
+- `Idempotency` reused for `mixer.mix`. Broadcasting is best-effort — a socket
+  failure never fails a saved mix.
+- SPA: ingredient picker, preview, MIKSUJ, polled status, fighter reveal,
+  Wojownicy list.
 
-AI Mixer: mix requests, provider abstraction, deterministic fallback generator,
-validation, queue processing, `mixer.completed` event. See spec §8–§11, §47–§50, §68.
+**56 feature/unit tests.**
+
+## Next: Phase 4
+
+Fighters & teams: `FighterStats` / `FighterSkill`, fighter details screen,
+`Team` / `TeamMember`, team builder. See spec §12–§21, §54, §68.

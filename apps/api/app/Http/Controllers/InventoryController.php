@@ -17,6 +17,7 @@ class InventoryController extends Controller
         $user = $request->user();
 
         $ingredients = $user->ingredients()
+            ->where('quantity', '>', 0)
             ->with('definition')
             ->get()
             ->sortBy('definition.id')
