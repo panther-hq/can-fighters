@@ -29,6 +29,10 @@ function errorText(error: unknown): string {
 export function CampaignView() {
   const regions = useRegions()
   const start = useStartRun()
+  const visit = useVisitNode()
+  // Held here (not in RunMap) so a lost battle — which ends the run and
+  // unmounts RunMap — still shows its replay + result.
+  const [result, setResult] = useState<VisitResult | null>(null)
 
   if (regions.isLoading) return <p className="muted">Wczytywanie mapy…</p>
   if (regions.isError) return <p className="muted muted--bad">Nie udało się wczytać mapy.</p>
@@ -36,8 +40,28 @@ export function CampaignView() {
   const run = regions.data?.run ?? null
   const list = regions.data?.regions ?? []
 
+  function onVisit(nodeId: string) {
+    visit.mutate(nodeId, {
+      onSuccess: (outcome) => {
+        // Merchant just parks you at the node — RunMap renders its shop.
+        if (outcome.type !== 'merchant') setResult(outcome)
+      },
+    })
+  }
+
+  if (result) {
+    return <NodeOutcome result={result} onDone={() => setResult(null)} />
+  }
+
   if (run && run.status === 'active') {
-    return <RunMap run={run} />
+    return (
+      <RunMap
+        run={run}
+        onVisit={onVisit}
+        visiting={visit.isPending ? (visit.variables ?? null) : null}
+        visitError={visit.isError ? errorText(visit.error) : null}
+      />
+    )
   }
 
   return (
@@ -71,9 +95,7 @@ export function CampaignView() {
               disabled={!region.unlocked || start.isPending}
               onClick={() => start.mutate(region.slug)}
             >
-              {start.isPending && start.variables === region.slug
-                ? 'Rusza…'
-                : 'Wyprawa'}
+              {start.isPending && start.variables === region.slug ? 'Rusza…' : 'Wyprawa'}
             </button>
           </li>
         ))}
@@ -83,24 +105,28 @@ export function CampaignView() {
   )
 }
 
-function RunMap({ run }: { run: RunView }) {
-  const visit = useVisitNode()
-  const buy = useMerchantBuy()
-  const advance = useAdvanceRun()
-  const abandon = useAbandonRun()
-  const [result, setResult] = useState<VisitResult | null>(null)
+const EVENT_TITLE: Record<string, string> = {
+  skarb: 'Skarb!',
+  trening: 'Trening',
+  pulapka: 'Pułapka!',
+  zasadzka: 'Zasadzka!',
+  handlarz: 'Handlarz',
+}
 
-  const cleared = new Set(run.clearedNodeIds)
-  const reachable = new Set(run.reachableNodeIds)
-
-  // A finished battle we are still showing the replay for.
-  if (result?.result?.events) {
+function NodeOutcome({
+  result,
+  onDone,
+}: {
+  result: VisitResult
+  onDone: () => void
+}) {
+  if (result.result?.events) {
     return (
       <BattleReplay
         events={result.result.events}
         won={result.won ?? false}
         heading="WYGRANA"
-        onDone={() => setResult(null)}
+        onDone={onDone}
       >
         {result.won && result.rewards && (
           <ul className="result__rewards">
@@ -111,38 +137,51 @@ function RunMap({ run }: { run: RunView }) {
             ))}
           </ul>
         )}
-        {result.runEnded && (
-          <p className="muted muted--bad">Wyprawa przerwana.</p>
-        )}
+        {result.runEnded && <p className="muted muted--bad">Wyprawa przerwana.</p>}
       </BattleReplay>
     )
   }
 
-  // A non-battle node outcome (loot / event) to acknowledge.
-  if (result && (result.type === 'loot' || result.type === 'event')) {
-    return (
-      <div className="node-result">
-        <p className="node-result__title">
-          {result.event === 'pulapka'
-            ? 'Pułapka!'
-            : result.type === 'loot'
-              ? 'Skrzynia'
-              : (result.event ?? 'Zdarzenie')}
-        </p>
-        <ul className="result__rewards">
-          {(result.rewards ?? []).map((reward, i) => (
-            <li key={i}>
-              <span>{rewardText(reward)}</span>
-            </li>
-          ))}
-        </ul>
-        <button type="button" className="btn btn--primary" onClick={() => setResult(null)}>
-          Dalej
-        </button>
-      </div>
-    )
-  }
+  return (
+    <div className="node-result">
+      <p className="node-result__title">
+        {result.event
+          ? (EVENT_TITLE[result.event] ?? 'Zdarzenie')
+          : result.type === 'loot'
+            ? 'Skrzynia'
+            : 'Zdarzenie'}
+      </p>
+      <ul className="result__rewards">
+        {(result.rewards ?? []).map((reward, i) => (
+          <li key={i}>
+            <span>{rewardText(reward)}</span>
+          </li>
+        ))}
+      </ul>
+      <button type="button" className="btn btn--primary" onClick={onDone}>
+        Dalej
+      </button>
+    </div>
+  )
+}
 
+function RunMap({
+  run,
+  onVisit,
+  visiting,
+  visitError,
+}: {
+  run: RunView
+  onVisit: (nodeId: string) => void
+  visiting: string | null
+  visitError: string | null
+}) {
+  const buy = useMerchantBuy()
+  const advance = useAdvanceRun()
+  const abandon = useAbandonRun()
+
+  const cleared = new Set(run.clearedNodeIds)
+  const reachable = new Set(run.reachableNodeIds)
   const merchant = run.activeMerchant
 
   return (
@@ -175,12 +214,14 @@ function RunMap({ run }: { run: RunView }) {
                     key={node.id}
                     type="button"
                     className="minimap__node is-reachable"
-                    disabled={visit.isPending}
+                    disabled={visiting !== null}
                     title={label}
-                    onClick={() => visit.mutate(node.id, { onSuccess: setResult })}
+                    onClick={() => onVisit(node.id)}
                   >
                     <span aria-hidden="true">{NODE_ICON[node.type as NodeType]}</span>
-                    <span className="minimap__caption">{label}</span>
+                    <span className="minimap__caption">
+                      {visiting === node.id ? '…' : label}
+                    </span>
                   </button>
                 ) : (
                   <span key={node.id} className={`minimap__node ${state}`} title={label}>
@@ -195,9 +236,7 @@ function RunMap({ run }: { run: RunView }) {
         </div>
       )}
 
-      {!merchant && visit.isError && (
-        <p className="muted muted--bad">{errorText(visit.error)}</p>
-      )}
+      {!merchant && visitError && <p className="muted muted--bad">{visitError}</p>}
 
       {merchant && (
         <div className="merchant">
