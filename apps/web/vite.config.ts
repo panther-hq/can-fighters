@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': { target: apiTarget, changeOrigin: true },
         '/sanctum': { target: apiTarget, changeOrigin: true },
+        '/broadcasting': { target: apiTarget, changeOrigin: true },
         '/up': { target: apiTarget, changeOrigin: true },
       },
     },

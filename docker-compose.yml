@@ -82,6 +82,11 @@ services:
       # SPA talks to the API through the Vite dev proxy (same-origin).
       VITE_API_URL: /api
       VITE_API_PROXY_TARGET: http://api:8000
+      # Reverb: the browser connects straight to the mapped ws port.
+      VITE_REVERB_APP_KEY: local-reverb-key
+      VITE_REVERB_HOST: localhost
+      VITE_REVERB_PORT: "8080"
+      VITE_REVERB_SCHEME: http
     depends_on:
       - api
 

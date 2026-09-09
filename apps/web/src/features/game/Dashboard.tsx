@@ -1,12 +1,14 @@
 import { useState } from 'react'
+import { ArenaView } from '../arena/ArenaView'
 import type { AuthUser } from '../auth/types'
 import { useLogout } from '../auth/useAuth'
 import { FightersView } from '../fighters/FightersView'
 import { CansView } from '../inventory/CansView'
 import { InventoryView } from '../inventory/InventoryView'
-import { ArenaView } from '../arena/ArenaView'
 import { MixerView } from '../mixer/MixerView'
 import { CampaignView } from '../pve/CampaignView'
+import { ConnectionBanner } from '../realtime/ConnectionBanner'
+import { useRealtimeSync } from '../realtime/useRealtimeSync'
 import { TeamView } from '../teams/TeamView'
 import { useBootstrap } from './useBootstrap'
 
@@ -34,9 +36,12 @@ const TABS: { id: Tab; label: string }[] = [
 export function Dashboard({ user }: { user: AuthUser }) {
   const logout = useLogout()
   const [tab, setTab] = useState<Tab>('panel')
+  const realtime = useRealtimeSync(user.id)
 
   return (
     <div className="dash">
+      <ConnectionBanner realtime={realtime} />
+
       <header className="dash__head">
         <div>
           <h1>{user.name}</h1>

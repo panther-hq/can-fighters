@@ -8,13 +8,13 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 9 — Async PvP Arena — MVP complete** (Phases 0–8 done).
-Set a defense team; challenge other players' defense teams while they're
-offline. Immutable team snapshots, backend-run battle, Elo rating + Polish
-leagues (Brąz → Puszkowa Legenda), opponent matchmaking by rating band,
-ranking + history, and `arena.defense_attacked` / `arena.rating_updated`
-broadcasts. This closes the spec §67 Definition of Done — a new player can go
-account → can → mix → team → equip → PvE → PvP end to end.
+**Phase 10 — responsive polish + realtime** (Phases 0–9 done).
+Mobile-first: a fixed bottom nav (scrollable) on phones, an in-flow tab row on
+wider screens, 44px touch targets, safe-area padding, the battle stage scales
+to 100%. **Laravel Echo + Reverb** wired: `useRealtimeSync` subscribes to
+`private-player.{id}` and turns `mixer.completed` / `arena.*` events into
+TanStack Query invalidations (spec §41); a `ConnectionBanner` shows offline /
+no-realtime and refetches everything on reconnect (spec §70).
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -197,11 +197,21 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 - SPA: `TeamView` parametrised by team type; `ArenaView` with Obrona / Walka /
   Ranking / Historia panels; `BattleReplay` generalised (PvE + Arena share it).
 
-**222 feature/unit tests** (+14: Elo maths + leagues, defense team,
-opponents filtering, challenge win/rating/records, self-challenge + no-defense
-guards, idempotency, ranking + history).
+**Phase 10 — responsive polish + realtime**
 
-## Next: Phase 10
+- `lib/echo.ts` — Echo bound to Reverb; private-channel auth goes through the
+  axios client (`/broadcasting/auth` via the Vite proxy, Sanctum cookie).
+  `broadcasting/auth` verified: own channel 200, foreign channel 403.
+- `features/realtime/useRealtimeSync` — `private-player.{id}` listener →
+  query invalidations; tracks the connection state. `ConnectionBanner` —
+  offline / realtime-down notice + refetch-all on `online`.
+- CSS: bottom nav on mobile, top tab row ≥ 40rem, 44px targets, safe-area
+  insets, `.replay__stage` max-width 100%.
+- compose: `VITE_REVERB_*` for the web service; Vite proxies `/broadcasting`.
 
-Responsive polish: mobile/tablet/desktop layout, bottom nav, touch targets,
-loading/offline/reconnect states, Echo wiring for realtime. See spec §60–§61, §68.
+**222 feature/unit tests** (frontend-only phase). Backend unchanged.
+
+## Next: Phase 11
+
+Live PvP: matchmaking queue (Redis), a battle room, server-authoritative skill
+actions, WebSocket battle events, reconnect + disconnect grace. See spec §31, §45, §68.
