@@ -1027,3 +1027,90 @@ code {
 .kv .bad {
   color: #f16a6e;
 }
+
+/* --- live pvp --- */
+
+.live-lobby {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+.live__round {
+  margin: 1rem 0 0.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.live__side {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+}
+
+.unitchip {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.6rem;
+  color: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.unitchip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.unitchip--foe {
+  border-left: 3px solid #e5484d;
+}
+
+.unitchip.is-selected {
+  border-color: #3b6cff;
+  background: #1a2233;
+}
+
+.unitchip__name {
+  font-weight: 600;
+}
+
+.unitchip__bar {
+  height: 5px;
+  border-radius: 999px;
+  background: #232a38;
+  overflow: hidden;
+}
+
+.unitchip__hp {
+  display: block;
+  height: 100%;
+  background: #35c46a;
+}
+
+.live__log {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.7rem;
+  background: #10141c;
+  border: 1px solid #232a38;
+  border-radius: 0.5rem;
+  font-size: 0.78rem;
+  color: #8b95a7;
+  display: grid;
+  gap: 0.15rem;
+  min-height: 2.5rem;
+}
+
+.live__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+  align-items: center;
+}

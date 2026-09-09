@@ -8,6 +8,7 @@ use App\Http\Controllers\FighterController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\LiveBattleController;
 use App\Http\Controllers\MixerController;
 use App\Http\Controllers\PveController;
 use App\Http\Controllers\TeamController;
@@ -100,4 +101,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('arena/ranking', [ArenaController::class, 'ranking']);
     Route::get('arena/history', [ArenaController::class, 'history']);
     Route::post('arena/challenge/{player}', [ArenaController::class, 'challenge']);
+
+    Route::post('arena/live/queue', [LiveBattleController::class, 'queue']);
+    Route::delete('arena/live/queue', [LiveBattleController::class, 'leaveQueue']);
+    Route::get('battles/{liveBattle}', [LiveBattleController::class, 'show']);
+    Route::post('battles/{liveBattle}/actions', [LiveBattleController::class, 'act']);
+    Route::post('battles/{liveBattle}/resolve', [LiveBattleController::class, 'resolve']);
 });

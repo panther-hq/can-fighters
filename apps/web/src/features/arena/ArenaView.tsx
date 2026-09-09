@@ -1,6 +1,7 @@
 import { isAxiosError } from 'axios'
 import { useState } from 'react'
 import { BattleReplay } from '../battle/BattleReplay'
+import { LivePanel } from '../live/LivePanel'
 import { TeamView } from '../teams/TeamView'
 import {
   useArena,
@@ -11,11 +12,12 @@ import {
 } from './hooks'
 import type { ChallengeOutcome } from './types'
 
-type Panel = 'defense' | 'fight' | 'ranking' | 'history'
+type Panel = 'defense' | 'fight' | 'live' | 'ranking' | 'history'
 
 const PANELS: { id: Panel; label: string }[] = [
   { id: 'defense', label: 'Obrona' },
   { id: 'fight', label: 'Walka' },
+  { id: 'live', label: 'Na żywo' },
   { id: 'ranking', label: 'Ranking' },
   { id: 'history', label: 'Historia' },
 ]
@@ -79,6 +81,7 @@ export function ArenaView() {
         </>
       )}
       {panel === 'fight' && <OpponentsPanel onOutcome={setOutcome} errorText={errorText} />}
+      {panel === 'live' && <LivePanel />}
       {panel === 'ranking' && <RankingPanel />}
       {panel === 'history' && <HistoryPanel />}
     </section>

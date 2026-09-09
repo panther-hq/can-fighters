@@ -8,13 +8,18 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 10 — responsive polish + realtime** (Phases 0–9 done).
-Mobile-first: a fixed bottom nav (scrollable) on phones, an in-flow tab row on
-wider screens, 44px touch targets, safe-area padding, the battle stage scales
-to 100%. **Laravel Echo + Reverb** wired: `useRealtimeSync` subscribes to
-`private-player.{id}` and turns `mixer.completed` / `arena.*` events into
-TanStack Query invalidations (spec §41); a `ConnectionBanner` shows offline /
-no-realtime and refetches everything on reconnect (spec §70).
+**All 11 phases complete.**
+
+**Phase 11 — Live PvP** (Phases 0–10 done).
+Matchmaking queue (Cache/Redis, FIFO) pairs two players into a persisted
+`LiveBattle`. Each round both players pick one alive fighter + an action
+(attack / skill with a target); the second submission — or a timeout poll —
+resolves the round server-side through `LiveRoundResolver` (deterministic per
+seed + round), emits `battle.updated` on `private-battle.{id}`, and on a wipe
+applies Elo. Energy regenerates per round; skills cost energy + set cooldowns.
+Endpoints: `POST/DELETE /api/arena/live/queue`, `GET /api/battles/{id}` (also
+the reconnect path), `POST /api/battles/{id}/actions|resolve`. SPA: a "Na żywo"
+lobby + a round-by-round battle screen.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -211,7 +216,26 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 
 **222 feature/unit tests** (frontend-only phase). Backend unchanged.
 
-## Next: Phase 11
+**Phase 11 — Live PvP**
 
-Live PvP: matchmaking queue (Redis), a battle room, server-authoritative skill
-actions, WebSocket battle events, reconnect + disconnect grace. See spec §31, §45, §68.
+- `Domain\Live\`: `Matchmaking` (Cache-backed FIFO queue + lock),
+  `LiveRoundResolver` (one round: two actions in speed order, then DoT /
+  effect-expiry / energy regen; deterministic), `LiveEnergy` (cost from
+  cooldown), `LiveBattleService` (create room, validate + record intents,
+  resolve, timeout-fill, Elo on finish). `live_battles` table, `config/live.php`.
+- `LiveMatchFound` / `LiveBattleUpdated` events; `battle.{id}` channel auth.
+- Server validates every intent (spec §32): your alive fighter, skill exists,
+  off cooldown, enough energy, legal target.
+- SPA: `LivePanel` (queue + poll-to-match), `LiveBattleScreen` (unit chips
+  with HP/energy, actor → action → target, event log, `resolve` poll while
+  waiting, reconnect via `GET /battles/{id}`).
+
+**234 feature/unit tests** (+12: round resolution determinism / skill cost /
+heal / winner / energy regen; matchmaking, matched battle, leave queue, round
+resolves on both acting, intent validation, timeout auto-resolve, full battle
++ rating change).
+
+## Done
+
+All 11 phases of `can-fighters-specification.md` §68 are implemented, tested
+and pushed. See `docs/` for per-area notes.
