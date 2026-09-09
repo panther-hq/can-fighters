@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { ArenaView } from '../arena/ArenaView'
 import type { AuthUser } from '../auth/types'
 import { useLogout } from '../auth/useAuth'
+import { DailyCard } from '../economy/DailyCard'
+import { ShopView } from '../economy/ShopView'
 import { FightersView } from '../fighters/FightersView'
 import { CansView } from '../inventory/CansView'
 import { InventoryView } from '../inventory/InventoryView'
@@ -21,6 +23,7 @@ type Tab =
   | 'team'
   | 'campaign'
   | 'arena'
+  | 'shop'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'panel', label: 'Panel' },
@@ -31,6 +34,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'team', label: 'Drużyna' },
   { id: 'campaign', label: 'Kampania' },
   { id: 'arena', label: 'Arena' },
+  { id: 'shop', label: 'Sklep' },
 ]
 
 export function Dashboard({ user }: { user: AuthUser }) {
@@ -80,6 +84,7 @@ export function Dashboard({ user }: { user: AuthUser }) {
       {tab === 'team' && <TeamView />}
       {tab === 'campaign' && <CampaignView />}
       {tab === 'arena' && <ArenaView />}
+      {tab === 'shop' && <ShopView />}
     </div>
   )
 }
@@ -91,6 +96,8 @@ function PanelTab({ user }: { user: AuthUser }) {
 
   return (
     <>
+      <DailyCard />
+
       <section className="stats">
         <div className="stat">
           <span className="stat__value">{profile.level}</span>

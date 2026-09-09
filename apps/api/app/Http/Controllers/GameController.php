@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Arena\LeagueTable;
+use App\Domain\Economy\DailyReward;
 use App\Http\Resources\PlayerCanResource;
 use App\Http\Resources\PlayerProfileResource;
 use App\Http\Resources\TeamResource;
@@ -17,7 +18,7 @@ class GameController extends Controller
      *
      * Spec §43. Sections fill in as their systems land; the shape is stable.
      */
-    public function bootstrap(Request $request): JsonResponse
+    public function bootstrap(Request $request, DailyReward $daily): JsonResponse
     {
         $user = $request->user()->load([
             'playerProfile',
@@ -29,6 +30,7 @@ class GameController extends Controller
         $defense = $user->teams->firstWhere('type', 'defense');
 
         $rating = (int) ($profile->rating ?? 1000);
+        $dailyStatus = $daily->status($user);
 
         return response()->json([
             'player' => [
@@ -49,6 +51,10 @@ class GameController extends Controller
                 'rating' => $rating,
                 'league' => LeagueTable::forRating($rating),
                 'defenseSet' => $defense !== null && $defense->members->isNotEmpty(),
+            ],
+            'daily' => [
+                'canClaim' => $dailyStatus['canClaim'],
+                'streak' => $dailyStatus['streak'],
             ],
             'notifications' => [],
             'serverTime' => now()->toIso8601String(),

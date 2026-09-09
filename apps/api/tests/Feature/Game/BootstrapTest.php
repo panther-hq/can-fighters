@@ -47,6 +47,7 @@ class BootstrapTest extends TestCase
                 'cans' => [],
                 'pve' => ['stagesCleared' => 0, 'stagesTotal' => $response->json('pve.stagesTotal')],
                 'arena' => ['rating' => 1042, 'league' => 'Srebro', 'defenseSet' => false],
+                'daily' => ['canClaim' => true, 'streak' => 0],
                 'notifications' => [],
                 'serverTime' => $response->json('serverTime'),
             ]);

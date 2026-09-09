@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('player_dailies', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('streak')->default(0);
+            $table->unsignedInteger('best_streak')->default(0);
+            $table->date('last_claimed_on')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('player_shops', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
+            $table->date('generated_on')->nullable();
+            $table->json('offers');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('player_shops');
+        Schema::dropIfExists('player_dailies');
+    }
+};

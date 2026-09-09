@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArenaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CanController;
+use App\Http\Controllers\DailyController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\FighterController;
 use App\Http\Controllers\GameController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LiveBattleController;
 use App\Http\Controllers\MixerController;
 use App\Http\Controllers\PveController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -68,6 +70,11 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('game/bootstrap', [GameController::class, 'bootstrap']);
+
+    Route::get('daily', [DailyController::class, 'show']);
+    Route::post('daily/claim', [DailyController::class, 'claim']);
+    Route::get('shop', [ShopController::class, 'index']);
+    Route::post('shop/{offer}/buy', [ShopController::class, 'buy']);
 
     Route::get('ingredients', [IngredientController::class, 'index']);
     Route::get('player/inventory', [InventoryController::class, 'show']);

@@ -14,6 +14,7 @@ export interface Bootstrap {
   cans: PlayerCan[]
   pve: { stagesCleared: number; stagesTotal: number }
   arena: { rating: number; league: string; defenseSet: boolean }
+  daily: { canClaim: boolean; streak: number }
   notifications: unknown[]
   serverTime: string
 }
