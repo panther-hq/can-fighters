@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment
+.env
+.env.*.local
+apps/api/.env
+apps/web/.env.local
+
+# Build output
+apps/web/dist/
+apps/api/public/build/
+apps/api/public/hot
+
+# Laravel runtime
+apps/api/storage/*.key
+apps/api/storage/framework/cache/data/*
+apps/api/storage/framework/sessions/*
+apps/api/storage/framework/views/*
+apps/api/storage/logs/*
+apps/api/bootstrap/cache/*.php
+
+# Editor / OS
+.DS_Store
+*.log
+
+# Keep the JetBrains project, ignore local workspace noise
+.idea/workspace.xml
+.idea/shelf/
+.idea/tasks.xml

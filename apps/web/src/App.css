@@ -1,0 +1,150 @@
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  background: #10141c;
+  color: #e8ecf4;
+}
+
+.shell {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem;
+}
+
+.shell__head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+.shell__logo {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.shell__head h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.shell__tag {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: #8b95a7;
+}
+
+.status {
+  border: 1px solid #232a38;
+  border-radius: 0.9rem;
+  padding: 1.1rem 1.2rem;
+  background: #161c27;
+}
+
+.status__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.status__dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: #f5a623;
+  flex: none;
+}
+
+.status--ok .status__dot {
+  background: #35c46a;
+}
+
+.status--unreachable .status__dot,
+.status--degraded .status__dot {
+  background: #e5484d;
+}
+
+.status__label {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status__refresh {
+  margin-left: auto;
+  border: 1px solid #2c3444;
+  background: #1d2431;
+  color: inherit;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.status__refresh:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.status__checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.status__checks li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  background: #1b222e;
+}
+
+.status__checks .ok {
+  color: #43d17f;
+  font-weight: 600;
+}
+
+.status__checks .bad {
+  color: #f16a6e;
+  font-weight: 600;
+}
+
+.status__meta {
+  margin: 0.9rem 0 0;
+  font-size: 0.8rem;
+  color: #8b95a7;
+}
+
+.status__meta--bad {
+  color: #f16a6e;
+}
+
+.hint {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #8b95a7;
+}
+
+code {
+  background: #232a38;
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.85em;
+}

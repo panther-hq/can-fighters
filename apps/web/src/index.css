@@ -1,0 +1,6 @@
+/* Minimal reset — component styles live alongside their components. */
+html,
+body,
+#root {
+  min-height: 100%;
+}
