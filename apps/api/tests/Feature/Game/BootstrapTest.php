@@ -45,6 +45,7 @@ class BootstrapTest extends TestCase
                 'currencies' => ['coins' => 500],
                 'team' => null,
                 'cans' => [],
+                'pve' => ['stagesCleared' => 0, 'stagesTotal' => $response->json('pve.stagesTotal')],
                 'notifications' => [],
                 'serverTime' => $response->json('serverTime'),
             ]);

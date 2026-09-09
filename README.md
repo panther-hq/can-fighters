@@ -8,13 +8,14 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 6 — Battle Engine** (Phases 0–5 done).
-`App\Domain\Battle\` — a pure, deterministic, backend-authoritative
-auto-battler. `BattleEngine::run($combatants, $seed)` → a winner + an ordered
-`events[]` stream (spec §34) that the frontend replays. Initiative by speed,
-per-class targeting (spec §21), a `SkillResolver` covering the skill families
-(damage / DoT / heal / shield / control / buffs), crits, counters, always
-terminates. No HTTP yet — PvE (phase 7) wires it up.
+**Phase 7 — PvE** (Phases 0–6 done).
+The Kitchen region: 6 stages + a boss (spec §6), enemies statted from the
+class profiles at a per-stage budget. `POST /api/pve/stages/{slug}/battle`
+builds your campaign team vs the stage, runs the Battle Engine, persists the
+battle + snapshots, and on a win grants coins/xp, rolled ingredient/can drops,
+fighter XP (with level-ups) and star progress that unlocks the next stage.
+`GET /api/pve/stages`, `GET /api/pve/battles/{id}` (replay). SPA gets a
+**Kampania** tab and a **Phaser** battle replay that plays the event stream.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -158,11 +159,22 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 - Deterministic: same combatants + seed → identical event stream.
 - `docs/BATTLE.md` documents the model + event types.
 
-**187 feature/unit tests** (+24: determinism, outcome, death, speed order,
-event ordering, damage/defense/crit, targeting incl. taunt, heal/shield/stun/
-poison/buff/debuff/lifesteal).
+**Phase 7 — PvE**
 
-## Next: Phase 7
+- `pve_stage_definitions` + `PveKitchenSeeder` (6 Kitchen stages, Polish enemy
+  names). `battles` + `battle_snapshots` + `player_stage_progress`.
+- `Domain\PvE\EnemyCombatants` (class profile → enemy at stage budget, bosses
+  bumped), `FightStage` (atomic: build → simulate → persist → reward + XP +
+  progress + unlock). `Idempotency` on the battle POST.
+- `StandardBalanceEngine::statsForBudget()` shared by fighters and enemies.
+- SPA: `useStages` / `useFightStage`, `CampaignView` (stage list, lock/stars),
+  and `BattleReplay` + a Phaser `BattleScene` that replays `events` (HP bars,
+  floating damage, lunges, skill/effect labels) with a result + rewards overlay.
 
-PvE: Kitchen region, stages, a boss, rewards, and the Phaser battle view that
-replays `events`. See spec §6, §27, §34, §68.
+**197 feature/unit tests** (+10: stage lock/unlock, win rewards + progress +
+fighter XP, loss grants nothing, 403 locked, 422 no team, idempotency, replay).
+
+## Next: Phase 8
+
+Equipment: weapon/armor/accessory slots, rolled stats, equip/unequip, stat
+contribution into the Balance Engine. See spec §23–§26, §68.

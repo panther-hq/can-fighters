@@ -88,4 +88,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Team::class);
     }
+
+    /**
+     * @return HasMany<PlayerStageProgress, $this>
+     */
+    public function stageProgress(): HasMany
+    {
+        return $this->hasMany(PlayerStageProgress::class);
+    }
 }

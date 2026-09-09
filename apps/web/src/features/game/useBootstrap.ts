@@ -12,6 +12,7 @@ export interface Bootstrap {
   currencies: { coins: number }
   team: Team | null
   cans: PlayerCan[]
+  pve: { stagesCleared: number; stagesTotal: number }
   notifications: unknown[]
   serverTime: string
 }

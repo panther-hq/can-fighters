@@ -7,6 +7,7 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MixerController;
+use App\Http\Controllers\PveController;
 use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -82,4 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('teams', [TeamController::class, 'show']);
     Route::put('teams', [TeamController::class, 'update']);
+
+    Route::get('pve/stages', [PveController::class, 'stages']);
+    Route::post('pve/stages/{stage:slug}/battle', [PveController::class, 'battle']);
+    Route::get('pve/battles/{battle}', [PveController::class, 'battleShow']);
 });

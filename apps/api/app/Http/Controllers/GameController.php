@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PlayerCanResource;
 use App\Http\Resources\PlayerProfileResource;
 use App\Http\Resources\TeamResource;
+use App\Models\PveStageDefinition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -25,6 +26,9 @@ class GameController extends Controller
         $profile = $user->playerProfile;
         $team = $user->teams->firstWhere('type', 'campaign');
 
+        $stagesTotal = PveStageDefinition::count();
+        $stagesCleared = $user->stageProgress()->where('stars', '>=', 1)->count();
+
         return response()->json([
             'player' => [
                 'id' => $user->id,
@@ -36,6 +40,7 @@ class GameController extends Controller
             ],
             'team' => $team ? TeamResource::make($team)->resolve() : null,
             'cans' => PlayerCanResource::collection($user->cans),
+            'pve' => ['stagesCleared' => $stagesCleared, 'stagesTotal' => $stagesTotal],
             'notifications' => [],
             'serverTime' => now()->toIso8601String(),
         ]);

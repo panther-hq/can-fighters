@@ -37,8 +37,22 @@ class StandardBalanceEngine
      */
     public function stats(Fighter $fighter): array
     {
-        $budget = $this->budget($fighter);
-        $raw = $this->rawStats($fighter);
+        return $this->statsForBudget(
+            $this->budget($fighter),
+            $fighter->primary_class,
+            $fighter->secondary_class,
+        );
+    }
+
+    /**
+     * Class profile -> stats normalised to a target budget. Used for fighters
+     * and for PvE enemies (which are not Fighter models).
+     *
+     * @return array{hp: int, attack: int, defense: int, magic: int, speed: int, crit: int, power_score: int, budget: int, pvp_legal: bool}
+     */
+    public function statsForBudget(int $budget, string $primaryClass, ?string $secondaryClass = null): array
+    {
+        $raw = $this->rawStats($primaryClass, $secondaryClass);
 
         $rawPower = $this->powerScore($raw);
         $k = $rawPower > 0 ? $budget / $rawPower : 1.0;
@@ -87,9 +101,9 @@ class StandardBalanceEngine
     /**
      * @return array<string, float>
      */
-    private function rawStats(Fighter $fighter): array
+    private function rawStats(string $primaryClass, ?string $secondaryClass): array
     {
-        $profile = $this->profile($fighter->primary_class, $fighter->secondary_class);
+        $profile = $this->profile($primaryClass, $secondaryClass);
         $scale = config('balance.scale');
         $floor = config('balance.floor');
 

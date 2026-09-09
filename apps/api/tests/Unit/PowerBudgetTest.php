@@ -2,10 +2,12 @@
 
 namespace Tests\Unit;
 
+use App\Domain\Balance\SkillParameterResolver;
 use App\Domain\Balance\StandardBalanceEngine;
 use App\Models\Fighter;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\MakesFighters;
 use Tests\TestCase;
 
@@ -27,7 +29,7 @@ class PowerBudgetTest extends TestCase
         return $cases;
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('fighterMatrix')]
+    #[DataProvider('fighterMatrix')]
     public function test_power_score_tracks_the_budget(string $class, string $rarity, int $level): void
     {
         $fighter = $this->makeFighter(User::factory()->create(), [
@@ -86,7 +88,7 @@ class PowerBudgetTest extends TestCase
 
     public function test_skill_power_grows_with_skill_level(): void
     {
-        $resolver = app(\App\Domain\Balance\SkillParameterResolver::class);
+        $resolver = app(SkillParameterResolver::class);
 
         $l1 = $resolver->resolve('direct_damage', 1)['power'];
         $l4 = $resolver->resolve('direct_damage', 4)['power'];

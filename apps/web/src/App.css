@@ -731,3 +731,137 @@ code {
   margin-top: 1.25rem;
   width: 100%;
 }
+
+/* --- campaign --- */
+
+.campaign__region {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.7rem;
+}
+
+.stage--locked {
+  opacity: 0.55;
+}
+
+.stage--boss {
+  border-color: #f5a62366;
+}
+
+.stage__info {
+  flex: 1;
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.stage__name {
+  font-weight: 600;
+}
+
+.stage__stars {
+  color: #f5c451;
+  letter-spacing: 0.1em;
+  font-size: 0.8rem;
+}
+
+/* --- battle replay --- */
+
+.replay {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+}
+
+.replay__stage {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 360 / 420;
+  border: 1px solid #232a38;
+  border-radius: 0.8rem;
+  overflow: hidden;
+  background: #0f1420;
+}
+
+.replay__controls {
+  min-height: 2rem;
+}
+
+.result {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  border: 1px solid #232a38;
+  border-radius: 0.8rem;
+  padding: 1rem;
+  background: #161c27;
+  display: grid;
+  gap: 0.6rem;
+  justify-items: center;
+}
+
+.result--win {
+  border-color: #35c46a66;
+}
+
+.result--lose {
+  border-color: #e5484d66;
+}
+
+.result__title {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.result--win .result__title {
+  color: #43d17f;
+}
+
+.result--lose .result__title {
+  color: #f16a6e;
+}
+
+.result__stars {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #f5c451;
+  letter-spacing: 0.1em;
+}
+
+.result__rewards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.result__rewards li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.45rem;
+  background: #1b222e;
+}

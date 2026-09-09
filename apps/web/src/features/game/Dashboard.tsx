@@ -5,10 +5,11 @@ import { FightersView } from '../fighters/FightersView'
 import { CansView } from '../inventory/CansView'
 import { InventoryView } from '../inventory/InventoryView'
 import { MixerView } from '../mixer/MixerView'
+import { CampaignView } from '../pve/CampaignView'
 import { TeamView } from '../teams/TeamView'
 import { useBootstrap } from './useBootstrap'
 
-type Tab = 'panel' | 'cans' | 'inventory' | 'mixer' | 'fighters' | 'team'
+type Tab = 'panel' | 'cans' | 'inventory' | 'mixer' | 'fighters' | 'team' | 'campaign'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'panel', label: 'Panel' },
@@ -17,6 +18,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'mixer', label: 'Mikser' },
   { id: 'fighters', label: 'Wojownicy' },
   { id: 'team', label: 'Drużyna' },
+  { id: 'campaign', label: 'Kampania' },
 ]
 
 export function Dashboard({ user }: { user: AuthUser }) {
@@ -61,6 +63,7 @@ export function Dashboard({ user }: { user: AuthUser }) {
       {tab === 'mixer' && <MixerView />}
       {tab === 'fighters' && <FightersView />}
       {tab === 'team' && <TeamView />}
+      {tab === 'campaign' && <CampaignView />}
     </div>
   )
 }
@@ -111,6 +114,12 @@ function PanelTab({ user }: { user: AuthUser }) {
               <span>Puszki</span>
               <span>
                 {bootstrap.data.cans.reduce((sum, can) => sum + can.quantity, 0)}
+              </span>
+            </li>
+            <li>
+              <span>Kampania</span>
+              <span>
+                {bootstrap.data.pve.stagesCleared}/{bootstrap.data.pve.stagesTotal}
               </span>
             </li>
             <li>
