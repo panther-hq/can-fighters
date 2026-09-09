@@ -197,7 +197,7 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 - SPA: `TeamView` parametrised by team type; `ArenaView` with Obrona / Walka /
   Ranking / Historia panels; `BattleReplay` generalised (PvE + Arena share it).
 
-**237 feature/unit tests** (+15: Elo maths + leagues, defense team,
+**222 feature/unit tests** (+14: Elo maths + leagues, defense team,
 opponents filtering, challenge win/rating/records, self-challenge + no-defense
 guards, idempotency, ranking + history).
 
