@@ -2,6 +2,7 @@
 
 namespace App\Domain\Mixer;
 
+use App\Domain\Balance\StandardBalanceEngine;
 use App\Events\MixerCompleted;
 use App\Events\MixerFailed;
 use App\Jobs\ProcessMixRequest;
@@ -21,7 +22,19 @@ use Throwable;
  */
 class MixerService
 {
-    public function __construct(private ConceptValidator $validator) {}
+    public function __construct(
+        private ConceptValidator $validator,
+        private StandardBalanceEngine $balance,
+    ) {}
+
+    /**
+     * Generate + legalise a concept (shared by preview, the queue job and
+     * fighter mutation).
+     */
+    public function generateConcept(CharacterGenerationInput $input): CharacterConcept
+    {
+        return $this->validator->validate($this->generate($input));
+    }
 
     /**
      * Generate a concept without consuming anything (spec §55 mixer/preview).
@@ -36,7 +49,7 @@ class MixerService
 
         $generationInput = new CharacterGenerationInput($specs, random_int(1, PHP_INT_MAX));
 
-        return $this->validator->validate($this->generate($generationInput));
+        return $this->generateConcept($generationInput);
     }
 
     /**
@@ -79,7 +92,7 @@ class MixerService
         try {
             $specs = $this->buildSpecs($mix->input);
             $generationInput = new CharacterGenerationInput($specs, $mix->seed);
-            $concept = $this->validator->validate($this->generate($generationInput));
+            $concept = $this->generateConcept($generationInput);
 
             $fighter = $this->persistFighter($mix->user, $concept, $mix->seed, $mix->generation_version);
 
@@ -145,7 +158,7 @@ class MixerService
 
     private function persistFighter(User $user, CharacterConcept $concept, int $seed, int $version): Fighter
     {
-        return $user->fighters()->create([
+        $fighter = $user->fighters()->create([
             'name' => $concept->name,
             'description' => $concept->description,
             'primary_class' => $concept->primaryClass,
@@ -158,6 +171,19 @@ class MixerService
             'generation_seed' => $seed,
             'generation_version' => $version,
         ]);
+
+        foreach ($concept->suggestedSkills as $slot => $skill) {
+            $fighter->skills()->create([
+                'slot' => $slot,
+                'skill_family' => $skill['skillFamily'],
+                'modifier' => $skill['modifier'] ?? null,
+                'parameters' => [],
+            ]);
+        }
+
+        $this->balance->apply($fighter->load('skills'));
+
+        return $fighter->fresh(['stats', 'skills']);
     }
 
     /**

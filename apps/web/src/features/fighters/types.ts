@@ -3,6 +3,24 @@ export interface SuggestedSkill {
   modifier: string | null
 }
 
+export interface FighterStats {
+  hp: number
+  attack: number
+  defense: number
+  magic: number
+  speed: number
+  crit: number
+  powerScore: number
+}
+
+export interface FighterSkill {
+  slot: number
+  skillFamily: string
+  modifier: string | null
+  level: number
+  parameters: Record<string, number>
+}
+
 export interface Fighter {
   id: number
   name: string
@@ -16,6 +34,8 @@ export interface Fighter {
   traits: string[]
   visualDna: Record<string, string>
   suggestedSkills: SuggestedSkill[]
+  stats?: FighterStats
+  skills?: FighterSkill[]
   createdAt: string | null
 }
 

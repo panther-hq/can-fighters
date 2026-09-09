@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PlayerCanResource;
 use App\Http\Resources\PlayerProfileResource;
+use App\Http\Resources\TeamResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -16,8 +17,13 @@ class GameController extends Controller
      */
     public function bootstrap(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['playerProfile', 'cans.definition']);
+        $user = $request->user()->load([
+            'playerProfile',
+            'cans.definition',
+            'teams' => fn ($q) => $q->where('type', 'campaign')->with('members.fighter.stats'),
+        ]);
         $profile = $user->playerProfile;
+        $team = $user->teams->firstWhere('type', 'campaign');
 
         return response()->json([
             'player' => [
@@ -28,7 +34,7 @@ class GameController extends Controller
             'currencies' => [
                 'coins' => $profile->coins,
             ],
-            'team' => null,
+            'team' => $team ? TeamResource::make($team)->resolve() : null,
             'cans' => PlayerCanResource::collection($user->cans),
             'notifications' => [],
             'serverTime' => now()->toIso8601String(),

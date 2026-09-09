@@ -21,8 +21,19 @@ Planned MVP surface: spec §55. This file tracks what actually exists.
 | POST   | `/api/mixer/preview`  | session | `{ ingredients: [{slug, quantity}] }` → `{ concept }` (no consumption) |
 | POST   | `/api/mixer/mix`      | session | Consumes ingredients, queues generation → `202 { mixId, status, fighter }` (Idempotency-Key) |
 | GET    | `/api/mixer/{mix}`    | session | `{ mixId, status, error, fighter }` — poll while `processing`         |
-| GET    | `/api/fighters`       | session | `{ data: [Fighter, …] }`                                             |
-| GET    | `/api/fighters/{fighter}` | session | one Fighter                                                     |
+| GET    | `/api/fighters`       | session | `{ data: [Fighter, …] }` (with `stats` + `skills`)                   |
+| GET    | `/api/fighters/{fighter}` | session | one Fighter with `stats` + `skills`                             |
+| POST   | `/api/fighters/{fighter}/upgrade` | session | Spend `level × 100` coins → level +1, stats recomputed   |
+| POST   | `/api/fighters/{fighter}/mutate`  | session | `{ ingredients }` (1–3) → shifts traits/visual/one skill, recomputes (Idempotency-Key) |
+| GET    | `/api/teams`          | session | `{ team: {id,type,members:[{position,fighter}]} \| null }`            |
+| PUT    | `/api/teams`          | session | `{ members: [{fighterId, position}] }` (0–3) → replaces the campaign roster |
+
+Stats come from `Domain\Balance\StandardBalanceEngine` (`config/balance.php`) —
+class weight profile × (rarity budget bonus) × level growth, `power_score` a
+weighted sum. Skill parameters are per-family baselines with level scaling.
+Team rules (spec §20): ≤3 members, unique positions (`front|middle|back`),
+unique fighters, all owned. `php artisan fighters:recompute-balance` re-runs
+the engine over everyone after tuning.
 
 Mixer flow (spec §8–§9, §47): `mix` validates + consumes ingredients (2–6 per
 mix), records a `mix_request`, dispatches `ProcessMixRequest`. The job asks the
@@ -80,14 +91,10 @@ matched by `Origin` against `SANCTUM_STATEFUL_DOMAINS`.
   "checks": { "database": true, "cache": true }, "time": "…" }
 ```
 
-## Next (Phase 4 — fighters & teams)
+## Next (Phase 5 — Balance Engine hardening)
 
-```
-GET  /api/fighters/{id}      (details incl. stats — after phase 5)
-POST /api/fighters/{id}/upgrade
-POST /api/fighters/{id}/mutate
-GET/POST/PUT /api/teams
-```
+Power Budget enforcement, PvP legality flag, richer skill parameter resolver,
+tuning pass + dedicated balance tests. Same call sites.
 
 ## Conventions
 

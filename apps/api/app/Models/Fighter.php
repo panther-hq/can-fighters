@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'user_id', 'name', 'description', 'primary_class', 'secondary_class', 'rarity',
@@ -40,5 +42,21 @@ class Fighter extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return HasOne<FighterStats, $this>
+     */
+    public function stats(): HasOne
+    {
+        return $this->hasOne(FighterStats::class);
+    }
+
+    /**
+     * @return HasMany<FighterSkill, $this>
+     */
+    public function skills(): HasMany
+    {
+        return $this->hasMany(FighterSkill::class)->orderBy('slot');
     }
 }

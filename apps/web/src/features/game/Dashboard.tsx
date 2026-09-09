@@ -5,9 +5,10 @@ import { FightersView } from '../fighters/FightersView'
 import { CansView } from '../inventory/CansView'
 import { InventoryView } from '../inventory/InventoryView'
 import { MixerView } from '../mixer/MixerView'
+import { TeamView } from '../teams/TeamView'
 import { useBootstrap } from './useBootstrap'
 
-type Tab = 'panel' | 'cans' | 'inventory' | 'mixer' | 'fighters'
+type Tab = 'panel' | 'cans' | 'inventory' | 'mixer' | 'fighters' | 'team'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'panel', label: 'Panel' },
@@ -15,6 +16,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'inventory', label: 'Plecak' },
   { id: 'mixer', label: 'Mikser' },
   { id: 'fighters', label: 'Wojownicy' },
+  { id: 'team', label: 'Drużyna' },
 ]
 
 export function Dashboard({ user }: { user: AuthUser }) {
@@ -58,6 +60,7 @@ export function Dashboard({ user }: { user: AuthUser }) {
       {tab === 'inventory' && <InventoryView />}
       {tab === 'mixer' && <MixerView />}
       {tab === 'fighters' && <FightersView />}
+      {tab === 'team' && <TeamView />}
     </div>
   )
 }
@@ -98,7 +101,11 @@ function PanelTab({ user }: { user: AuthUser }) {
           <ul className="kv">
             <li>
               <span>Drużyna</span>
-              <span>{bootstrap.data.team ? 'ustawiona' : 'brak'}</span>
+              <span>
+                {bootstrap.data.team
+                  ? `${bootstrap.data.team.members.length}/3`
+                  : 'brak'}
+              </span>
             </li>
             <li>
               <span>Puszki</span>

@@ -8,14 +8,13 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 3 — AI Mixer** (Phases 0–2 done).
-Mix 2–6 ingredients into a persistent fighter. `POST /api/mixer/preview`,
-`POST /api/mixer/mix` (queued, idempotent), `GET /api/mixer/{id}`,
-`GET /api/fighters`. Concepts come from a `CharacterGenerationProvider`
-(deterministic `fallback` by default; retry → fallback on failure — spec §49),
-are legalised by `ConceptValidator`, saved as `Fighter` (stats come in phase 5),
-and `mixer.completed` broadcasts on `private-player.{id}`. SPA gains
-Mikser + Wojownicy tabs with a fighter reveal.
+**Phase 4 — fighters & teams** (Phases 0–3 done).
+Fighters now carry real stats + skills from `Domain\Balance\StandardBalanceEngine`
+(`config/balance.php` — class weight profiles, rarity budget, level growth).
+`GET /api/fighters/{id}` (stats + skills), `POST .../upgrade` (coins → level),
+`POST .../mutate` (re-mix 1–3 ingredients — spec §19), `GET|PUT /api/teams`
+(3-slot campaign roster, spec §20). SPA gains fighter detail (stat bars,
+upgrade, mutate) and a Drużyna team builder.
 
 **The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
 validation/auth messages, Polish display names for game content; `slug`s stay
@@ -127,9 +126,22 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
 - SPA: ingredient picker, preview, MIKSUJ, polled status, fighter reveal,
   Wojownicy list.
 
-**56 feature/unit tests.**
+**Phase 4 — fighters & teams**
 
-## Next: Phase 4
+- `fighter_stats`, `fighter_skills`, `teams`, `team_members`, `fighter_mutations`.
+- `Domain\Balance\StandardBalanceEngine::apply()` — the only place numbers are
+  decided (spec §16). Runs on mix, on upgrade, on mutate; `fighters:recompute-balance`
+  command for tuning.
+- `Domain\Fighters\UpgradeFighter` (coins, atomic), `MutateFighter` (spec §19 —
+  bounded, records before/after). `Domain\Teams\SaveTeam` (validation).
+- `config/balance.php` holds every tunable.
+- SPA: `FighterDetail` (stat bars + skills + Ulepsz + Mutuj), `TeamView`
+  (Przód/Środek/Tył slots + picker + save).
+- `queue:listen` (was `queue:work`) so the dev worker picks up code changes.
 
-Fighters & teams: `FighterStats` / `FighterSkill`, fighter details screen,
-`Team` / `TeamMember`, team builder. See spec §12–§21, §54, §68.
+**85 feature/unit tests.**
+
+## Next: Phase 5
+
+Balance Engine hardening: Power Budget enforcement, PvP legality, skill
+parameter resolver, tuning + tests. See spec §15–§17, §68.

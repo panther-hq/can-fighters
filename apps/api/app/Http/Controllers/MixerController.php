@@ -40,7 +40,7 @@ class MixerController extends Controller
             function () use ($user, $request): array {
                 $mix = $this->mixer->requestMix($user, $request->ingredients());
 
-                return [202, MixRequestResource::make($mix->fresh(['resultFighter']))->resolve()];
+                return [202, MixRequestResource::make($mix->fresh(['resultFighter.stats', 'resultFighter.skills']))->resolve()];
             },
         );
 
@@ -54,7 +54,7 @@ class MixerController extends Controller
         abort_unless($mix->user_id === $request->user()->id, 404);
 
         return response()->json(
-            MixRequestResource::make($mix->load('resultFighter'))->resolve(),
+            MixRequestResource::make($mix->load(['resultFighter.stats', 'resultFighter.skills']))->resolve(),
         );
     }
 

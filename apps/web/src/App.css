@@ -590,3 +590,144 @@ code {
   font-size: 0.82rem;
   color: #8b95a7;
 }
+
+/* --- fighter detail --- */
+
+.fighter-list__item {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.detail__back {
+  padding-left: 0;
+}
+
+.detail__name {
+  margin: 0.5rem 0 0.1rem;
+  font-size: 1.3rem;
+}
+
+.detail__meta {
+  margin: 0;
+  color: #8b95a7;
+  font-size: 0.85rem;
+}
+
+.detail__desc {
+  margin: 0.75rem 0 1rem;
+  font-size: 0.9rem;
+  color: #c8cfdb;
+}
+
+.statbars {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.statbar {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 2.2rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.statbar__track {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #232a38;
+  overflow: hidden;
+}
+
+.statbar__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #3b6cff, #6fa8ff);
+}
+
+.statbar__value {
+  text-align: right;
+  font-weight: 700;
+}
+
+.detail__power {
+  margin: 0.6rem 0 0;
+  font-weight: 700;
+}
+
+.detail__skills {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+}
+
+.detail__actions {
+  margin-top: 1.25rem;
+}
+
+.detail__mutate {
+  margin-top: 1.5rem;
+  border-top: 1px solid #232a38;
+  padding-top: 1rem;
+}
+
+.detail__mutate h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.detail__mutate .btn {
+  margin-top: 0.75rem;
+}
+
+/* --- team builder --- */
+
+.team__slots {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.8rem;
+  min-height: 3.6rem;
+}
+
+.slot__label {
+  width: 4rem;
+  font-weight: 700;
+  color: #8b95a7;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.slot__fighter {
+  font-weight: 600;
+}
+
+.slot .btn {
+  margin-left: auto;
+}
+
+.team__picker {
+  margin-top: 1rem;
+}
+
+.team__save {
+  margin-top: 1.25rem;
+  width: 100%;
+}

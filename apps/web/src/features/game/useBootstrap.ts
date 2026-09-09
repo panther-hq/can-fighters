@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../lib/api'
 import type { PlayerCan } from '../inventory/types'
+import type { Team } from '../teams/types'
 
 export interface Bootstrap {
   player: {
@@ -9,7 +10,7 @@ export interface Bootstrap {
     profile: { level: number; xp: number; coins: number; rating: number }
   }
   currencies: { coins: number }
-  team: unknown | null
+  team: Team | null
   cans: PlayerCan[]
   notifications: unknown[]
   serverTime: string

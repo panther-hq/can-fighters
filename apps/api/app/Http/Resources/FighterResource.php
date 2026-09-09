@@ -29,6 +29,22 @@ class FighterResource extends JsonResource
             'traits' => $this->traits,
             'visualDna' => $this->visual_dna,
             'suggestedSkills' => $this->suggested_skills,
+            'stats' => $this->whenLoaded('stats', fn () => [
+                'hp' => $this->stats->hp,
+                'attack' => $this->stats->attack,
+                'defense' => $this->stats->defense,
+                'magic' => $this->stats->magic,
+                'speed' => $this->stats->speed,
+                'crit' => $this->stats->crit,
+                'powerScore' => $this->stats->power_score,
+            ]),
+            'skills' => $this->whenLoaded('skills', fn () => $this->skills->map(fn ($skill) => [
+                'slot' => $skill->slot,
+                'skillFamily' => $skill->skill_family,
+                'modifier' => $skill->modifier,
+                'level' => $skill->level,
+                'parameters' => $skill->parameters,
+            ])),
             'createdAt' => $this->created_at?->toIso8601String(),
         ];
     }

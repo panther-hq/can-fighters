@@ -49,7 +49,9 @@ services:
     build:
       context: .
       dockerfile: docker/api/Dockerfile
-    command: php artisan queue:work --tries=3 --timeout=90
+    # `queue:listen` boots a fresh worker per job so it picks up code changes
+    # without a container restart (fine for local; use queue:work in prod).
+    command: php artisan queue:listen --tries=3 --timeout=90
     volumes:
       - ./apps/api:/var/www/html
     depends_on:

@@ -80,4 +80,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(MixRequest::class);
     }
+
+    /**
+     * @return HasMany<Team, $this>
+     */
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class);
+    }
 }

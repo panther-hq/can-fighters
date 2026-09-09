@@ -7,6 +7,7 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MixerController;
+use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -76,4 +77,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('fighters', [FighterController::class, 'index']);
     Route::get('fighters/{fighter}', [FighterController::class, 'show']);
+    Route::post('fighters/{fighter}/upgrade', [FighterController::class, 'upgrade']);
+    Route::post('fighters/{fighter}/mutate', [FighterController::class, 'mutate']);
+
+    Route::get('teams', [TeamController::class, 'show']);
+    Route::put('teams', [TeamController::class, 'update']);
 });
