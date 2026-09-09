@@ -33,6 +33,20 @@ class RegisterTest extends TestCase
         $this->assertNotNull($user->playerProfile);
     }
 
+    public function test_a_new_player_receives_starter_cans(): void
+    {
+        $this->postJson('/api/auth/register', [
+            'name' => 'Stefan',
+            'email' => 'stefan@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertCreated();
+
+        $user = User::firstWhere('email', 'stefan@example.com');
+
+        $this->assertSame(3, $user->cans()->sum('quantity'));
+    }
+
     public function test_email_must_be_unique(): void
     {
         User::factory()->create(['email' => 'taken@example.com']);

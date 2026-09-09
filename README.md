@@ -8,10 +8,15 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 1 — accounts & bootstrap** (Phase 0 foundation done).
-Register / log in / log out with Sanctum SPA cookies, a `PlayerProfile` per
-user, and `GET /api/game/bootstrap`. The SPA shows a login/register form and,
-once authenticated, a dashboard fed by the bootstrap endpoint.
+**Phase 2 — ingredients & cans** (Phases 0–1 done).
+12 seeded ingredients + a starter can, `GET /api/ingredients`,
+`GET /api/player/inventory`, `GET /api/cans`, and `POST /api/cans/{can}/open`
+with `Idempotency-Key` replay protection. New players get 3 starter cans.
+The SPA has Panel / Puszki / Plecak tabs.
+
+**The UI is entirely in Polish** (`APP_LOCALE=pl`, `laravel-lang` for
+validation/auth messages, Polish display names for game content; `slug`s stay
+English as stable IDs).
 
 | Service         | URL                              | Notes                              |
 | --------------- | -------------------------------- | ---------------------------------- |
@@ -88,9 +93,27 @@ docs/      Per-area notes; see can-fighters-specification.md for the full spec
   (`statefulApi()`), session-fixation-safe (`session()->regenerate()`).
 - `GameController@bootstrap` → `GET /api/game/bootstrap` (spec §43 shape).
 - SPA: `useMe` / `useLogin` / `useRegister` / `useLogout` hooks, CSRF priming,
-  a login/register form, and a dashboard driven by the bootstrap endpoint.
-- 15 feature tests (register, login, logout, me, bootstrap).
+  a login/register form, a dashboard driven by the bootstrap endpoint.
 
-## Next: Phase 2
+**Phase 2 — ingredients & cans**
 
-Ingredients, cans, drop tables, opening cans, idempotency. See spec §7, §54, §55, §68.
+- `GameContentSeeder` (idempotent): 12 ingredients (spec §7) + 1 can, all with
+  Polish names. `ingredient_definitions`, `can_definitions`.
+- `player_ingredients`, `player_cans`, `can_openings` (seed + results — spec §11).
+- `Domain\Inventory\OpenCanService` — atomic (spec §57): row-locks the stack,
+  rolls the drop table with `WeightedRoller` (deterministic LCG), moves
+  ingredients in, records the opening.
+- `Support\Idempotency` + `idempotency_keys` — replay protection (spec §58).
+- `Domain\Player\GrantStarterPack` — 3 cans at register.
+- Endpoints: `GET /api/ingredients`, `GET /api/player/inventory`,
+  `GET /api/cans`, `POST /api/cans/{can}/open`.
+- Locale → `pl` via `laravel-lang`.
+- SPA: Panel / Puszki / Plecak tabs; open-a-can with reveal; `Idempotency-Key`
+  per request.
+
+**32 feature/unit tests.**
+
+## Next: Phase 3
+
+AI Mixer: mix requests, provider abstraction, deterministic fallback generator,
+validation, queue processing, `mixer.completed` event. See spec §8–§11, §47–§50, §68.

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PlayerCanResource;
 use App\Http\Resources\PlayerProfileResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,12 +12,11 @@ class GameController extends Controller
     /**
      * Everything the SPA needs to render the game after login / reconnect.
      *
-     * Spec §43. Most sections are empty until their systems land in later
-     * phases; the shape is stable so the frontend can rely on it now.
+     * Spec §43. Sections fill in as their systems land; the shape is stable.
      */
     public function bootstrap(Request $request): JsonResponse
     {
-        $user = $request->user()->load('playerProfile');
+        $user = $request->user()->load(['playerProfile', 'cans.definition']);
         $profile = $user->playerProfile;
 
         return response()->json([
@@ -29,7 +29,7 @@ class GameController extends Controller
                 'coins' => $profile->coins,
             ],
             'team' => null,
-            'cans' => [],
+            'cans' => PlayerCanResource::collection($user->cans),
             'notifications' => [],
             'serverTime' => now()->toIso8601String(),
         ]);

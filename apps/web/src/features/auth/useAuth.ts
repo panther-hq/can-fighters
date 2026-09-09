@@ -90,5 +90,5 @@ export function parseValidationError(error: unknown): {
     }
     return { message: body.message, fields }
   }
-  return { message: 'Something went wrong. Try again.', fields: {} }
+  return { message: 'Coś poszło nie tak. Spróbuj ponownie.', fields: {} }
 }

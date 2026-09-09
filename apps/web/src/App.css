@@ -78,6 +78,10 @@ body {
   background: #2f5ae0;
 }
 
+.btn--ghost {
+  background: transparent;
+}
+
 .muted {
   color: #8b95a7;
   font-size: 0.9rem;
@@ -260,4 +264,136 @@ code {
   .stats {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* --- tabs --- */
+
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 0.55rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.6rem;
+  color: #8b95a7;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs button.is-active {
+  color: #e8ecf4;
+  border-color: #3b6cff;
+  background: #1a2233;
+}
+
+/* --- cards (cans) --- */
+
+.cards {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.8rem;
+}
+
+.card__icon {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.card__body {
+  display: grid;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.card__name {
+  font-weight: 600;
+}
+
+/* --- reveal --- */
+
+.reveal {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #3b6cff;
+  border-radius: 0.8rem;
+  background: #182034;
+}
+
+.reveal h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+}
+
+.reveal__items {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reveal__items li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+}
+
+.reveal__icon {
+  font-size: 1.3rem;
+}
+
+/* --- ingredients grid --- */
+
+.ingredients {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.5rem;
+}
+
+.ingredient {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.6rem;
+  font-size: 0.88rem;
+}
+
+.ingredient__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.ingredient__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.ingredient__qty {
+  color: #b7c0d0;
+  font-weight: 700;
 }

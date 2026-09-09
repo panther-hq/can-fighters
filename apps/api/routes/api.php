@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CanController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\IngredientController;
+use App\Http\Controllers\InventoryController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -58,4 +61,10 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('game/bootstrap', [GameController::class, 'bootstrap']);
+
+    Route::get('ingredients', [IngredientController::class, 'index']);
+    Route::get('player/inventory', [InventoryController::class, 'show']);
+
+    Route::get('cans', [CanController::class, 'index']);
+    Route::post('cans/{can}/open', [CanController::class, 'open']);
 });

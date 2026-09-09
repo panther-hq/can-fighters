@@ -6,6 +6,12 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
+    /**
+     * Run DatabaseSeeder (game content: ingredients + cans) for every
+     * RefreshDatabase test — registration grants a starter can that needs it.
+     */
+    protected bool $seed = true;
+
     protected function setUp(): void
     {
         parent::setUp();

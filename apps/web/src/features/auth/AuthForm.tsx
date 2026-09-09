@@ -41,7 +41,7 @@ export function AuthForm() {
           className={mode === 'login' ? 'is-active' : ''}
           onClick={() => setMode('login')}
         >
-          Log in
+          Logowanie
         </button>
         <button
           type="button"
@@ -50,14 +50,14 @@ export function AuthForm() {
           className={mode === 'register' ? 'is-active' : ''}
           onClick={() => setMode('register')}
         >
-          Register
+          Rejestracja
         </button>
       </div>
 
       <form className="auth__form" onSubmit={submit} noValidate>
         {mode === 'register' && (
           <label className="field">
-            <span>Display name</span>
+            <span>Nazwa gracza</span>
             <input
               type="text"
               value={name}
@@ -70,7 +70,7 @@ export function AuthForm() {
         )}
 
         <label className="field">
-          <span>Email</span>
+          <span>E-mail</span>
           <input
             type="email"
             value={email}
@@ -82,7 +82,7 @@ export function AuthForm() {
         </label>
 
         <label className="field">
-          <span>Password</span>
+          <span>Hasło</span>
           <input
             type="password"
             value={password}
@@ -95,7 +95,7 @@ export function AuthForm() {
 
         {mode === 'register' && (
           <label className="field">
-            <span>Confirm password</span>
+            <span>Powtórz hasło</span>
             <input
               type="password"
               value={passwordConfirmation}
@@ -110,10 +110,10 @@ export function AuthForm() {
 
         <button type="submit" className="btn btn--primary" disabled={active.isPending}>
           {active.isPending
-            ? 'Working…'
+            ? 'Chwileczkę…'
             : mode === 'login'
-              ? 'Log in'
-              : 'Create account'}
+              ? 'Zaloguj się'
+              : 'Utwórz konto'}
         </button>
       </form>
     </div>

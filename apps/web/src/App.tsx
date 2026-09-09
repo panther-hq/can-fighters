@@ -14,17 +14,17 @@ function App() {
         </span>
         <div>
           <h1>Can Fighters</h1>
-          <p className="shell__tag">Phase 1 — accounts &amp; bootstrap</p>
+          <p className="shell__tag">Puszkowi wojownicy</p>
         </div>
       </header>
 
-      {isLoading && <p className="muted">Checking session…</p>}
+      {isLoading && <p className="muted">Sprawdzanie sesji…</p>}
 
       {isError && !isLoading && (
         <div className="panel">
-          <p className="muted muted--bad">Could not reach the API.</p>
+          <p className="muted muted--bad">Nie można połączyć się z serwerem.</p>
           <button type="button" className="btn" onClick={() => refetch()}>
-            Retry
+            Ponów
           </button>
         </div>
       )}

@@ -29,9 +29,21 @@ records decisions and their current state.
 
 ## Decisions
 
+- **UI language: Polish.** Every user-facing string is Polish. `APP_LOCALE=pl`
+  (fallback `en`); `laravel-lang/common` provides `lang/pl/*` for validation +
+  auth messages. Game content (ingredients, cans, …) has Polish `name`; `slug`
+  stays English as the stable ID.
 - **Auth**: Sanctum SPA cookie auth (stateful). SPA and API are same-origin in
   dev via the Vite proxy; `config/cors.php` has `supports_credentials => true`
   and the SPA origin allow-listed. Token auth is not used.
+- **Determinism**: random outcomes (can drops now; mixing, battles later) run
+  through a seeded generator and the seed is persisted with the result
+  (`can_openings.seed`). `Domain\Inventory\WeightedRoller` is a self-contained
+  LCG — no dependency on PHP's global RNG state.
+- **Idempotency**: `Support\Idempotency::run($user, $scope, $key, $work)` +
+  `idempotency_keys`. Wraps economic actions; a repeated key replays the stored
+  response. Sequential-retry safe; concurrent same-key requests are further
+  serialised by the row locks inside each action.
 - **Host runs nothing**: PHP/Composer/Node are container-only. The API image
   (`docker/api/Dockerfile`) is a PHP 8.4 CLI image with `pdo_pgsql` + `redis`,
   used for `artisan serve`, the queue worker and the Reverb server.

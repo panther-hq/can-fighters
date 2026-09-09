@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Domain\Player\GrantStarterPack;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -24,6 +25,7 @@ class AuthController extends Controller
         $user = DB::transaction(function () use ($request): User {
             $user = User::create($request->safe()->only('name', 'email', 'password'));
             $user->playerProfile()->create([]);
+            app(GrantStarterPack::class)($user);
 
             return $user;
         });

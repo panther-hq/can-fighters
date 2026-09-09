@@ -26,6 +26,13 @@ stage → Battle Engine → Phaser playback → win → Can Armor → equip → 
 guilds, clans, chat, trading, marketplace, world boss, advanced crafting, live
 PvP, 5-person teams, AI animation.
 
+## Language
+
+Whole UI + game content display names are Polish. Ingredient slugs (English)
+are the stable IDs the Mixer / balance systems key on. Ingredient names:
+Makaron, Śruba, Bateria, Ser, Skarpeta, Magnes, Widelec, Ryba, Ogień, Maź,
+Blaszana puszka, Sprężyna. Starter can: *Zardzewiała puszka*.
+
 ## Open questions
 
 - _(none yet)_

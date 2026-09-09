@@ -14,6 +14,21 @@ Planned MVP surface: spec §55. This file tracks what actually exists.
 | POST   | `/api/auth/logout`    | session | 204, ends session                                   |
 | GET    | `/api/auth/me`        | session | Current user + profile                              |
 | GET    | `/api/game/bootstrap` | session | Everything the SPA needs after login / reconnect    |
+| GET    | `/api/ingredients`    | session | Full ingredient catalogue (12, static content)      |
+| GET    | `/api/player/inventory`| session | `{ ingredients: [...], cans: [...] }`               |
+| GET    | `/api/cans`           | session | `{ data: [...] }` — the player's owned cans          |
+| POST   | `/api/cans/{can}/open`| session | Opens one can from that stack → `201 { openingId, seed, received[] }` |
+
+`{can}` is a **player_cans id**. Send an `Idempotency-Key` header on `open`
+(spec §58): a retry with the same key replays the stored result without opening
+a second can. The response carries `Idempotency-Replayed: true|false`.
+Empty stack → `422 { "message": "Nie masz tej puszki." }`; someone else's
+can → `404`.
+
+### Locale
+
+`APP_LOCALE=pl` (fallback `en`). Validation / auth messages come from
+`laravel-lang` (`lang/pl/*`). The whole UI is Polish.
 
 ### Auth model
 
@@ -52,13 +67,12 @@ matched by `Origin` against `SANCTUM_STATEFUL_DOMAINS`.
   "checks": { "database": true, "cache": true }, "time": "…" }
 ```
 
-## Next (Phase 2)
+## Next (Phase 3 — AI Mixer)
 
 ```
-GET  /api/ingredients
-GET  /api/cans
-POST /api/cans/{id}/open      (idempotency key)
-GET  /api/player/inventory
+POST /api/mixer/preview
+POST /api/mixer/mix          (queued; idempotency key)
+GET  /api/mixer/{mixId}
 ```
 
 ## Conventions

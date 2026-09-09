@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -38,5 +39,29 @@ class User extends Authenticatable
     public function playerProfile(): HasOne
     {
         return $this->hasOne(PlayerProfile::class);
+    }
+
+    /**
+     * @return HasMany<PlayerIngredient, $this>
+     */
+    public function ingredients(): HasMany
+    {
+        return $this->hasMany(PlayerIngredient::class);
+    }
+
+    /**
+     * @return HasMany<PlayerCan, $this>
+     */
+    public function cans(): HasMany
+    {
+        return $this->hasMany(PlayerCan::class);
+    }
+
+    /**
+     * @return HasMany<CanOpening, $this>
+     */
+    public function canOpenings(): HasMany
+    {
+        return $this->hasMany(CanOpening::class);
     }
 }
