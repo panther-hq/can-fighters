@@ -39,6 +39,15 @@ records decisions and their current state.
   Docker projects. Inter-service traffic uses standard ports + service names.
 - **`php artisan serve`** runs the API in dev. Production would be php-fpm +
   a web server; revisit before deploy.
+- **No compose `env_file`**: Laravel loads `apps/api/.env` from the mounted
+  volume itself. Injecting it as container OS env vars puts `APP_ENV=local`
+  into `$_SERVER`, which beats PHPUnit's overrides and `.env.testing` — the
+  suite would run as `local` against the dev Postgres. `.env.testing`
+  (committed, no secrets) drives the test run: sqlite `:memory:`, array
+  cache/session, `SANCTUM_STATEFUL_DOMAINS=localhost`.
+- **Test requests are treated as first-party SPA**: `tests/TestCase::setUp()`
+  sends `Origin: http://localhost` so Sanctum runs the session + CSRF stack.
+  CSRF itself is bypassed in tests (`runningUnitTests()`).
 
 ## Planned domain layout (spec §64)
 

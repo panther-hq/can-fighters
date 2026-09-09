@@ -47,92 +47,43 @@ body {
   color: #8b95a7;
 }
 
-.status {
-  border: 1px solid #232a38;
-  border-radius: 0.9rem;
-  padding: 1.1rem 1.2rem;
-  background: #161c27;
-}
+/* --- shared bits --- */
 
-.status__row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 0.9rem;
-}
-
-.status__dot {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  background: #f5a623;
-  flex: none;
-}
-
-.status--ok .status__dot {
-  background: #35c46a;
-}
-
-.status--unreachable .status__dot,
-.status--degraded .status__dot {
-  background: #e5484d;
-}
-
-.status__label {
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.status__refresh {
-  margin-left: auto;
+.btn {
   border: 1px solid #2c3444;
   background: #1d2431;
   color: inherit;
-  border-radius: 0.5rem;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.8rem;
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
-.status__refresh:disabled {
+.btn:hover:not(:disabled) {
+  background: #232c3c;
+}
+
+.btn:disabled {
   opacity: 0.55;
   cursor: default;
 }
 
-.status__checks {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.4rem;
-}
-
-.status__checks li {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  padding: 0.45rem 0.6rem;
-  border-radius: 0.5rem;
-  background: #1b222e;
-}
-
-.status__checks .ok {
-  color: #43d17f;
+.btn--primary {
+  background: #3b6cff;
+  border-color: #3b6cff;
   font-weight: 600;
 }
 
-.status__checks .bad {
-  color: #f16a6e;
-  font-weight: 600;
+.btn--primary:hover:not(:disabled) {
+  background: #2f5ae0;
 }
 
-.status__meta {
-  margin: 0.9rem 0 0;
-  font-size: 0.8rem;
+.muted {
   color: #8b95a7;
+  font-size: 0.9rem;
 }
 
-.status__meta--bad {
+.muted--bad {
   color: #f16a6e;
 }
 
@@ -142,9 +93,171 @@ body {
   color: #8b95a7;
 }
 
+.panel {
+  border: 1px solid #232a38;
+  border-radius: 0.9rem;
+  padding: 1.1rem 1.2rem;
+  background: #161c27;
+  margin-top: 1.25rem;
+}
+
+.panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
 code {
   background: #232a38;
   border-radius: 0.3rem;
   padding: 0.1rem 0.35rem;
   font-size: 0.85em;
+}
+
+/* --- auth form --- */
+
+.auth {
+  border: 1px solid #232a38;
+  border-radius: 0.9rem;
+  background: #161c27;
+  overflow: hidden;
+}
+
+.auth__tabs {
+  display: flex;
+}
+
+.auth__tabs button {
+  flex: 1;
+  padding: 0.85rem;
+  background: #131923;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #8b95a7;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth__tabs button.is-active {
+  color: #e8ecf4;
+  border-bottom-color: #3b6cff;
+  background: #161c27;
+}
+
+.auth__form {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.field span {
+  color: #b7c0d0;
+}
+
+.field input {
+  border: 1px solid #2c3444;
+  background: #10141c;
+  color: inherit;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+}
+
+.field input:focus {
+  outline: 2px solid #3b6cff;
+  outline-offset: 0;
+}
+
+.field__error {
+  color: #f16a6e;
+  font-style: normal;
+  font-size: 0.8rem;
+}
+
+.auth__error {
+  margin: 0;
+  color: #f16a6e;
+  font-size: 0.85rem;
+}
+
+/* --- dashboard --- */
+
+.dash__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dash__head h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.dash__sub {
+  margin: 0.2rem 0 0;
+  color: #8b95a7;
+  font-size: 0.85rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.stat {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  background: #161c27;
+  border: 1px solid #232a38;
+  border-radius: 0.7rem;
+}
+
+.stat__value {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.stat__label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8b95a7;
+}
+
+.kv {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.kv li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.5rem;
+  background: #1b222e;
+}
+
+.kv li span:last-child {
+  color: #b7c0d0;
+}
+
+@media (max-width: 24rem) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

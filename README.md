@@ -8,7 +8,10 @@ It is the source of truth for requirements; `docs/` holds working notes per area
 
 ## Status
 
-**Phase 0 — project foundation.** A running skeleton only: no game features yet.
+**Phase 1 — accounts & bootstrap** (Phase 0 foundation done).
+Register / log in / log out with Sanctum SPA cookies, a `PlayerProfile` per
+user, and `GET /api/game/bootstrap`. The SPA shows a login/register form and,
+once authenticated, a dashboard fed by the bootstrap endpoint.
 
 | Service         | URL                              | Notes                              |
 | --------------- | -------------------------------- | ---------------------------------- |
@@ -37,16 +40,18 @@ volume, so give it a minute. Then:
 
 ```bash
 curl http://localhost:8000/api/health          # {"status":"ok", ...}
-open http://localhost:5173                      # status page, all checks green
+open http://localhost:5173                      # register an account, land on the dashboard
 ```
 
 ### Common tasks
 
 ```bash
 docker compose exec api php artisan <cmd>       # artisan
-docker compose exec api php artisan test        # backend test suite
+docker compose exec api php artisan test        # backend test suite (in-memory sqlite)
+docker compose exec api ./vendor/bin/pint       # format PHP
 docker compose exec api composer <cmd>          # composer
-docker compose run --rm web npm <cmd>           # npm for the SPA
+docker compose exec web npm <cmd>               # npm for the SPA
+docker compose exec web npx tsc -b              # typecheck the SPA
 docker compose logs -f api web                  # tail logs
 docker compose down                             # stop
 docker compose down -v                          # stop + wipe db/redis/node_modules
@@ -63,18 +68,29 @@ docker/
 docs/      Per-area notes; see can-fighters-specification.md for the full spec
 ```
 
-## What Phase 0 set up
+## What's built
+
+**Phase 0 — foundation**
 
 - `docker-compose.yml`: postgres, redis, api, queue worker, reverb, web.
-- **API**: fresh Laravel; `install:api` (adds `routes/api.php` + Sanctum);
-  `laravel/reverb`; Postgres + Redis wired via `.env`; CORS configured for the
-  SPA origin with credentials (ready for Sanctum SPA cookie auth in Phase 1);
-  `GET /api/health` checks DB + cache and is what the SPA polls.
-- **Web**: Vite dev server with a same-origin `/api` proxy; TanStack Query +
-  axios client; a status page that proves `browser → Vite → Laravel → PG/Redis`.
-- Tests run against in-memory SQLite (`phpunit.xml`), isolated from the dev DB.
+- API: fresh Laravel; `install:api` + Sanctum; `laravel/reverb`; Postgres +
+  Redis wired via `.env`; CORS for the SPA origin with credentials;
+  `GET /api/health` checks DB + cache.
+- Web: Vite dev server with a same-origin `/api` proxy; TanStack Query + axios.
+- Laravel reads `apps/api/.env` from the mounted volume (no compose `env_file`,
+  which would shadow `.env.testing`). Tests run on in-memory SQLite via
+  `.env.testing`, isolated from the dev DB.
 
-## Next: Phase 1
+**Phase 1 — accounts & bootstrap**
 
-Auth (register / login / logout / me) with Sanctum SPA cookies, `PlayerProfile`,
-and `GET /api/game/bootstrap`. See spec §43, §54, §55, §68.
+- `PlayerProfile` (level, xp, coins, rating) — one per user, created at register.
+- `AuthController`: register / login / logout / me. Sanctum SPA cookie auth
+  (`statefulApi()`), session-fixation-safe (`session()->regenerate()`).
+- `GameController@bootstrap` → `GET /api/game/bootstrap` (spec §43 shape).
+- SPA: `useMe` / `useLogin` / `useRegister` / `useLogout` hooks, CSRF priming,
+  a login/register form, and a dashboard driven by the bootstrap endpoint.
+- 15 feature tests (register, login, logout, me, bootstrap).
+
+## Next: Phase 2
+
+Ingredients, cans, drop tables, opening cans, idempotency. See spec §7, §54, §55, §68.

@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\GameController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -10,9 +11,8 @@ use Illuminate\Support\Facades\Route;
 | API routes
 |--------------------------------------------------------------------------
 |
-| Phase 0 — running skeleton only. The health check exercises the full
-| request path: PHP -> PostgreSQL -> Redis, so the SPA can prove the
-| stack is wired end to end before any game feature exists.
+| Auth is Sanctum SPA cookie based: first-party requests go through the
+| session + CSRF stack (see bootstrap/app.php `statefulApi()`).
 |
 */
 
@@ -25,14 +25,14 @@ Route::get('/health', function () {
     try {
         DB::connection()->getPdo();
         $checks['database'] = true;
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         // reported as false below
     }
 
     try {
         Cache::store()->put('health:ping', 'pong', 5);
         $checks['cache'] = Cache::store()->get('health:ping') === 'pong';
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         // reported as false below
     }
 
@@ -46,6 +46,16 @@ Route::get('/health', function () {
     ], $ok ? 200 : 503);
 });
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::prefix('auth')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('me', [AuthController::class, 'me']);
+        Route::post('logout', [AuthController::class, 'logout']);
+    });
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('game/bootstrap', [GameController::class, 'bootstrap']);
+});

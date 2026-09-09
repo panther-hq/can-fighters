@@ -37,8 +37,8 @@ services:
       - ./apps/api:/var/www/html
     ports:
       - "8000:8000"
-    env_file:
-      - ./apps/api/.env
+    # No env_file: Laravel reads apps/api/.env from the mounted volume itself.
+    # Injecting it as container env vars would shadow .env.testing during tests.
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,8 +52,6 @@ services:
     command: php artisan queue:work --tries=3 --timeout=90
     volumes:
       - ./apps/api:/var/www/html
-    env_file:
-      - ./apps/api/.env
     depends_on:
       - api
 
@@ -66,8 +64,6 @@ services:
       - ./apps/api:/var/www/html
     ports:
       - "8080:8080"
-    env_file:
-      - ./apps/api/.env
     depends_on:
       - api
 
