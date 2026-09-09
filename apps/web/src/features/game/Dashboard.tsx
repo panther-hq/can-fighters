@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArenaView } from '../arena/ArenaView'
 import type { AuthUser } from '../auth/types'
 import { useLogout } from '../auth/useAuth'
+import { CollectionPanel } from '../economy/CollectionPanel'
 import { DailyCard } from '../economy/DailyCard'
 import { ShopView } from '../economy/ShopView'
 import { FightersView } from '../fighters/FightersView'
@@ -167,7 +168,7 @@ function PanelTab({ user }: { user: AuthUser }) {
         )}
       </section>
 
-      <p className="hint">Wkrótce: Mikser — łączenie składników w wojowników.</p>
+      <CollectionPanel />
     </>
   )
 }

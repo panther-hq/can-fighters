@@ -1318,3 +1318,100 @@ code {
 .merchant .btn:last-child {
   margin-top: 0.6rem;
 }
+
+/* --- run minimap --- */
+
+.minimap {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  background: #10141c;
+  border: 1px solid #232a38;
+  border-radius: 0.8rem;
+}
+
+.minimap__row {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.minimap__node {
+  display: grid;
+  place-items: center;
+  gap: 0.15rem;
+  min-width: 2.6rem;
+  min-height: 2.6rem;
+  padding: 0.3rem;
+  border-radius: 0.55rem;
+  border: 1px solid #232a38;
+  background: #161c27;
+  color: inherit;
+  font-size: 1.1rem;
+}
+
+.minimap__node.is-future {
+  opacity: 0.4;
+}
+
+.minimap__node.is-cleared {
+  color: #43d17f;
+  border-color: #35c46a44;
+  background: #14231a;
+}
+
+.minimap__node.is-reachable {
+  border-color: #3b6cff;
+  background: #1a2233;
+  box-shadow: 0 0 0 1px #3b6cff55;
+  cursor: pointer;
+  min-width: 4rem;
+  padding: 0.45rem 0.6rem;
+}
+
+.minimap__node.is-reachable:hover:not(:disabled) {
+  background: #21304a;
+}
+
+.minimap__node.is-reachable:disabled {
+  opacity: 0.6;
+}
+
+.minimap__caption {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #b7c0d0;
+}
+
+/* --- collection panel --- */
+
+.coll__row {
+  display: grid;
+  grid-template-columns: 5rem 1fr 3rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.coll__track {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: #232a38;
+  overflow: hidden;
+}
+
+.coll__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #3b6cff, #6fa8ff);
+}
+
+.coll__value {
+  text-align: right;
+  font-weight: 700;
+}
+
+.coll .kv {
+  margin-top: 0.6rem;
+}

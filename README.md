@@ -235,7 +235,27 @@ heal / winner / energy regen; matchmaking, matched battle, leave queue, round
 resolves on both acting, intent validation, timeout auto-resolve, full battle
 + rating change).
 
+## Post-MVP — engagement
+
+The MVP was a menu of systems; these passes make it a place with reasons to
+return and more ways to earn cans.
+
+- **Daily reward** (`GET/POST /api/daily`) — 7-day login-streak ladder, day 7
+  is a can. **Shop** (`GET /api/shop`, `POST /api/shop/{offer}/buy`) —
+  per-player daily stock (can / ingredients / equipment) for coins.
+  `Domain\Economy\{GrantReward,DailyReward,Shop}`.
+- **Roguelike region map** — the campaign is a branching node graph you route
+  through (battle / elite / loot / merchant / event / boss), generated per run
+  from a seed. 4 regions (spec §6) unlocking in sequence. Loot nodes give free
+  ingredients/cans; a lost fight or ambush ends the run; the boss clears the
+  region. `Domain\PvE\{RegionMapGenerator,RunBattle,RegionRun}`,
+  `region_definitions` / `player_region_runs` / `player_region_clears`.
+  Replaces the old flat stage list.
+- **Kolekcja** panel (`GET /api/collection`) — progress goals (ingredients
+  found, regions cleared, best streak, arena) on the dashboard.
+
+**251 feature/unit tests.**
+
 ## Done
 
-All 11 phases of `can-fighters-specification.md` §68 are implemented, tested
-and pushed. See `docs/` for per-area notes.
+## Done

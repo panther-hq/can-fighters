@@ -45,6 +45,17 @@ export interface BuyResult {
   coins: number
 }
 
+export interface Collection {
+  ingredientsFound: number
+  ingredientsTotal: number
+  fighters: number
+  regionsCleared: number
+  regionsTotal: number
+  bestDailyStreak: number
+  arenaRating: number
+  league: string
+}
+
 export function rewardLabel(reward: RewardLine): string {
   switch (reward.type) {
     case 'coins':

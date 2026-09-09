@@ -90,16 +90,8 @@ function RunMap({ run }: { run: RunView }) {
   const abandon = useAbandonRun()
   const [result, setResult] = useState<VisitResult | null>(null)
 
-  const nodesById = new Map(
-    run.map.rows.flatMap((r) => r.nodes.map((n) => [n.id, n])),
-  )
-  const reachable = run.reachableNodeIds
-    .map((id) => nodesById.get(id))
-    .filter((n): n is NonNullable<typeof n> => n != null)
-  const clearedTrail = run.clearedNodeIds
-    .map((id) => nodesById.get(id))
-    .filter((n): n is NonNullable<typeof n> => n != null)
-  const bossReached = run.reachableNodeIds.includes('boss')
+  const cleared = new Set(run.clearedNodeIds)
+  const reachable = new Set(run.reachableNodeIds)
 
   // A finished battle we are still showing the replay for.
   if (result?.result?.events) {
@@ -167,21 +159,47 @@ function RunMap({ run }: { run: RunView }) {
         </button>
       </div>
 
-      <div className={`runmap__boss ${bossReached ? 'is-live' : ''}`}>
-        👑 {bossReached ? 'Boss czeka!' : 'Boss regionu'}
-      </div>
-
-      {clearedTrail.length > 0 && (
-        <div className="runmap__trail">
-          {clearedTrail.map((node) => (
-            <span key={node.id} title={NODE_LABEL[node.type as NodeType]}>
-              {NODE_ICON[node.type as NodeType]}
-            </span>
+      {!merchant && (
+        <div className="minimap">
+          {[...run.map.rows].reverse().map((row) => (
+            <div key={row.row} className="minimap__row">
+              {row.nodes.map((node) => {
+                const state = cleared.has(node.id)
+                  ? 'is-cleared'
+                  : reachable.has(node.id)
+                    ? 'is-reachable'
+                    : 'is-future'
+                const label = NODE_LABEL[node.type as NodeType]
+                return state === 'is-reachable' ? (
+                  <button
+                    key={node.id}
+                    type="button"
+                    className="minimap__node is-reachable"
+                    disabled={visit.isPending}
+                    title={label}
+                    onClick={() => visit.mutate(node.id, { onSuccess: setResult })}
+                  >
+                    <span aria-hidden="true">{NODE_ICON[node.type as NodeType]}</span>
+                    <span className="minimap__caption">{label}</span>
+                  </button>
+                ) : (
+                  <span key={node.id} className={`minimap__node ${state}`} title={label}>
+                    <span aria-hidden="true">
+                      {state === 'is-cleared' ? '✓' : NODE_ICON[node.type as NodeType]}
+                    </span>
+                  </span>
+                )
+              })}
+            </div>
           ))}
         </div>
       )}
 
-      {merchant ? (
+      {!merchant && visit.isError && (
+        <p className="muted muted--bad">{errorText(visit.error)}</p>
+      )}
+
+      {merchant && (
         <div className="merchant">
           <h3>Kupiec</h3>
           <ul className="cards">
@@ -215,31 +233,6 @@ function RunMap({ run }: { run: RunView }) {
           </button>
           {buy.isError && <p className="muted muted--bad">{errorText(buy.error)}</p>}
         </div>
-      ) : (
-        <>
-          <p className="muted runmap__prompt">Wybierz drogę:</p>
-          <ul className="runmap__choices">
-            {reachable.map((node) => (
-              <li key={node.id}>
-                <button
-                  type="button"
-                  className="runmap__choice"
-                  disabled={visit.isPending}
-                  onClick={() => visit.mutate(node.id, { onSuccess: setResult })}
-                >
-                  <span className="runmap__choice-icon" aria-hidden="true">
-                    {NODE_ICON[node.type as NodeType]}
-                  </span>
-                  <span>{NODE_LABEL[node.type as NodeType]}</span>
-                  {visit.isPending && visit.variables === node.id && (
-                    <span className="muted"> …</span>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-          {visit.isError && <p className="muted muted--bad">{errorText(visit.error)}</p>}
-        </>
       )}
     </section>
   )

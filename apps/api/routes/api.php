@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArenaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CanController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\DailyController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\FighterController;
@@ -73,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('daily', [DailyController::class, 'show']);
     Route::post('daily/claim', [DailyController::class, 'claim']);
+    Route::get('collection', [CollectionController::class, 'show']);
     Route::get('shop', [ShopController::class, 'index']);
     Route::post('shop/{offer}/buy', [ShopController::class, 'buy']);
 

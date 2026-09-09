@@ -2,10 +2,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api'
 import type {
   BuyResult,
+  Collection,
   DailyClaimResult,
   DailyStatus,
   ShopState,
 } from './types'
+
+export function useCollection() {
+  return useQuery({
+    queryKey: ['collection'],
+    queryFn: async (): Promise<Collection> => {
+      const { data } = await api.get<Collection>('/collection')
+      return data
+    },
+  })
+}
 
 export function useDaily() {
   return useQuery({
