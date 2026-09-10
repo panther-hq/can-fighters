@@ -33,19 +33,17 @@ export interface Region {
   timesCleared: number
 }
 
-export type NodeType = 'battle' | 'elite' | 'loot' | 'merchant' | 'event' | 'boss'
+export type TileType = 'grass' | 'rock' | 'water'
+export type ObjectKind = 'enemy' | 'treasure' | 'event' | 'boss'
 
-export interface MapNode {
+export interface MapObject {
   id: string
-  row: number
-  col: number
-  type: NodeType
-  edges: string[]
-}
-
-export interface MapRow {
-  row: number
-  nodes: MapNode[]
+  x: number
+  y: number
+  kind: ObjectKind
+  elite?: boolean
+  budget?: number
+  enemies?: { name: string; class: string }[]
 }
 
 export interface MerchantOffer {
@@ -56,19 +54,24 @@ export interface MerchantOffer {
   bought: boolean
 }
 
-export interface RunView {
+export interface OverworldView {
   runId: number
   regionSlug: string
   status: 'active' | 'cleared' | 'abandoned'
-  currentRow: number
-  clearedNodeIds: string[]
-  reachableNodeIds: string[]
-  activeMerchant: { nodeId: string; offers: MerchantOffer[] } | null
-  map: { regionSlug: string; seed: number; rows: MapRow[] }
+  day: number
+  movementLeft: number
+  movementMax: number
+  hero: { x: number; y: number }
+  size: { width: number; height: number }
+  terrain: TileType[]
+  revealed: string[]
+  objects: MapObject[]
+  activeMerchant: { objectId: string; offers: MerchantOffer[] } | null
 }
 
-export interface VisitResult {
-  type: string
+/** Outcome of a `move` — a plain walk, an end-of-day, or a resolved object. */
+export interface MoveResult {
+  type: 'move' | 'day' | 'battle' | 'loot' | 'event' | 'merchant'
   event?: string
   won?: boolean
   runEnded?: boolean
@@ -76,23 +79,20 @@ export interface VisitResult {
   result?: BattleResult
   rewards?: RewardLine[]
   offers?: MerchantOffer[]
-  run: RunView
+  path?: [number, number][]
+  run: OverworldView
 }
 
-export const NODE_ICON: Record<NodeType, string> = {
-  battle: '⚔️',
-  elite: '💀',
-  loot: '🎁',
-  merchant: '🛒',
+export const OBJECT_ICON: Record<ObjectKind, string> = {
+  enemy: '⚔️',
+  treasure: '🎁',
   event: '❓',
   boss: '👑',
 }
 
-export const NODE_LABEL: Record<NodeType, string> = {
-  battle: 'Walka',
-  elite: 'Elita',
-  loot: 'Skrzynia',
-  merchant: 'Kupiec',
+export const OBJECT_LABEL: Record<ObjectKind, string> = {
+  enemy: 'Wróg',
+  treasure: 'Skarb',
   event: 'Zdarzenie',
   boss: 'Boss',
 }

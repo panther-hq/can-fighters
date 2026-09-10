@@ -12,14 +12,17 @@ use App\Support\SeededRng;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Drives a roguelike region expedition: a branching node map you route through
- * from the bottom to the boss. Each node clears on visit; a lost battle or a
- * sprung ambush ends the run.
+ * Drives a Heroes-3-style region expedition: a tile map you walk a hero across
+ * with a per-day movement budget and fog of war. Stepping onto a roaming enemy
+ * starts a battle, onto a treasure grants loot, onto a "?" fires an event. A
+ * lost battle ends the run; beating the boss clears the region.
  */
 class RegionRun
 {
+    private const IMPASSABLE = ['rock', 'water'];
+
     public function __construct(
-        private RegionMapGenerator $generator,
+        private OverworldMapGenerator $generator,
         private RunBattle $runBattle,
         private GrantReward $grant,
     ) {}
@@ -74,16 +77,27 @@ class RegionRun
                 ->update(['status' => PlayerRegionRun::STATUS_ABANDONED]);
 
             $seed = random_int(1, PHP_INT_MAX);
+            $map = $this->generator->generate($region, $seed);
+            $move = (int) config('regions.overworld.movement_per_day');
 
-            return PlayerRegionRun::create([
+            $run = new PlayerRegionRun([
                 'user_id' => $user->id,
                 'region_slug' => $region->slug,
                 'seed' => $seed,
-                'map' => $this->generator->generate($region, $seed),
-                'current_row' => -1,
-                'cleared_node_ids' => [],
+                'map' => $map,
+                'hero_x' => $map['start']['x'],
+                'hero_y' => $map['start']['y'],
+                'movement_left' => $move,
+                'movement_max' => $move,
+                'day' => 1,
+                'revealed' => [],
+                'resolved_object_ids' => [],
                 'status' => PlayerRegionRun::STATUS_ACTIVE,
             ]);
+            $run->revealed = $this->reveal($run, [[$map['start']['x'], $map['start']['y']]]);
+            $run->save();
+
+            return $run;
         });
     }
 
@@ -95,49 +109,124 @@ class RegionRun
     }
 
     /**
-     * @return list<string>
-     */
-    public function reachableNodeIds(PlayerRegionRun $run): array
-    {
-        if ($run->status !== PlayerRegionRun::STATUS_ACTIVE || $run->active_merchant !== null) {
-            return [];
-        }
-        if ($run->current_row === -1) {
-            return array_column($run->map['rows'][0]['nodes'], 'id');
-        }
-        $last = $this->findNode($run, $run->last_node_id);
-
-        return $last['edges'] ?? [];
-    }
-
-    /**
+     * Walk the hero toward (x, y) along the shortest passable path, spending one
+     * movement point per tile. If the day's budget runs out first the hero stops
+     * partway. Landing on an unresolved object resolves it.
+     *
      * @return array<string, mixed>
      */
-    public function visit(User $user, PlayerRegionRun $run, string $nodeId): array
+    public function move(User $user, PlayerRegionRun $run, int $x, int $y): array
     {
-        if ($run->status !== PlayerRegionRun::STATUS_ACTIVE) {
-            throw new StageLockedException('Ta wyprawa się zakończyła.');
-        }
+        $this->assertActive($run);
         if ($run->active_merchant !== null) {
             throw new StageLockedException('Najpierw opuść kupca.');
         }
-        if (! in_array($nodeId, $this->reachableNodeIds($run), true)) {
-            throw new StageLockedException('Tam nie możesz teraz przejść.');
+
+        $map = $run->map;
+        $w = (int) $map['width'];
+        $h = (int) $map['height'];
+        if ($x < 0 || $y < 0 || $x >= $w || $y >= $h) {
+            throw new StageLockedException('To pole jest poza mapą.');
         }
-        if (in_array($nodeId, $run->cleared_node_ids, true)) {
-            throw new StageLockedException('Ten węzeł jest już przebyty.');
+        if (in_array($map['terrain'][$y * $w + $x], self::IMPASSABLE, true)) {
+            throw new StageLockedException('Tam nie da się wejść.');
+        }
+        if ($x === (int) $run->hero_x && $y === (int) $run->hero_y) {
+            throw new StageLockedException('Już tu jesteś.');
         }
 
-        $node = $this->findNode($run, $nodeId);
-        $region = RegionDefinition::query()->where('slug', $run->region_slug)->firstOrFail();
+        $path = $this->findPath($run, [(int) $run->hero_x, (int) $run->hero_y], [$x, $y]);
+        if ($path === null) {
+            throw new StageLockedException('Nie ma drogi do tego pola.');
+        }
 
-        return match ($node['type']) {
-            'battle', 'elite', 'boss' => $this->resolveBattle($user, $run, $node, $region),
-            'loot' => $this->resolveLoot($user, $run, $node, $region),
-            'event' => $this->resolveEvent($user, $run, $node, $region),
-            'merchant' => $this->openMerchant($run, $node, $region),
-            default => throw new StageLockedException('Nieznany węzeł.'),
-        };
+        $steps = count($path) - 1;
+        $budget = (int) $run->movement_left;
+
+        if ($steps > $budget) {
+            $partial = array_slice($path, 0, $budget + 1);
+            $land = end($partial);
+            $this->walkTo($run, $land, $partial);
+            $run->update(['movement_left' => 0]);
+
+            return ['type' => 'move', 'path' => $partial, 'run' => $this->view($run->fresh())];
+        }
+
+        $this->walkTo($run, [$x, $y], $path);
+        $run->update(['movement_left' => $budget - $steps]);
+
+        $object = $this->unresolvedObjectAt($run, $x, $y);
+        if ($object === null) {
+            return ['type' => 'move', 'path' => $path, 'run' => $this->view($run->fresh())];
+        }
+
+        $outcome = $this->resolveObject($user, $run->fresh(), $object);
+        $outcome['path'] = $path;
+
+        return $outcome;
+    }
+
+    /**
+     * Refill the movement budget and drift every un-cleared roaming enemy one
+     * tile (deterministic per seed + day), so the map feels alive between turns.
+     *
+     * @return array<string, mixed>
+     */
+    public function endDay(User $user, PlayerRegionRun $run): array
+    {
+        $this->assertActive($run);
+        if ($run->active_merchant !== null) {
+            throw new StageLockedException('Najpierw opuść kupca.');
+        }
+
+        $day = (int) $run->day + 1;
+        $map = $run->map;
+        $w = (int) $map['width'];
+        $h = (int) $map['height'];
+        $resolved = $run->resolved_object_ids ?? [];
+
+        $occupied = [];
+        foreach ($map['objects'] as $o) {
+            if (! in_array($o['id'], $resolved, true)) {
+                $occupied[$o['x'].','.$o['y']] = true;
+            }
+        }
+
+        foreach ($map['objects'] as $i => $o) {
+            if ($o['kind'] !== 'enemy' || in_array($o['id'], $resolved, true)) {
+                continue;
+            }
+            $rng = new SeededRng((int) $run->seed + $day * 7919 + crc32((string) $o['id']));
+            [$dx, $dy] = [[1, 0], [-1, 0], [0, 1], [0, -1]][$rng->int(4)];
+            $nx = (int) $o['x'] + $dx;
+            $ny = (int) $o['y'] + $dy;
+
+            if ($nx < 0 || $ny < 0 || $nx >= $w || $ny >= $h) {
+                continue;
+            }
+            if (in_array($map['terrain'][$ny * $w + $nx], self::IMPASSABLE, true)) {
+                continue;
+            }
+            if (isset($occupied[$nx.','.$ny])) {
+                continue;
+            }
+            if ($nx === (int) $run->hero_x && $ny === (int) $run->hero_y) {
+                continue;
+            }
+
+            unset($occupied[$o['x'].','.$o['y']]);
+            $occupied[$nx.','.$ny] = true;
+            $map['objects'][$i]['x'] = $nx;
+            $map['objects'][$i]['y'] = $ny;
+        }
+
+        $run->update([
+            'day' => $day,
+            'movement_left' => (int) $run->movement_max,
+            'map' => $map,
+        ]);
+
+        return ['type' => 'day', 'run' => $this->view($run->fresh())];
     }
 
     /**
@@ -180,30 +269,53 @@ class RegionRun
      */
     public function leaveMerchant(PlayerRegionRun $run): array
     {
-        if ($run->active_merchant === null) {
+        $merchant = $run->active_merchant;
+        if ($merchant === null) {
             return ['run' => $this->view($run)];
         }
-        $node = $this->findNode($run, $run->active_merchant['nodeId']);
-        $this->advance($run, $node);
+        $this->markResolved($run, $merchant['objectId']);
         $run->update(['active_merchant' => null]);
 
         return ['run' => $this->view($run->fresh())];
     }
 
     /**
-     * @param  array<string, mixed>  $node
+     * @param  array<string, mixed>  $object
      * @return array<string, mixed>
      */
-    private function resolveBattle(User $user, PlayerRegionRun $run, array $node, RegionDefinition $region): array
+    private function resolveObject(User $user, PlayerRegionRun $run, array $object): array
+    {
+        $region = RegionDefinition::query()->where('slug', $run->region_slug)->firstOrFail();
+
+        return match ($object['kind']) {
+            'enemy', 'boss' => $this->resolveBattle($user, $run, $object, $region),
+            'treasure' => $this->resolveTreasure($user, $run, $object),
+            'event' => $this->resolveEvent($user, $run, $object, $region),
+            default => throw new StageLockedException('Nieznany obiekt.'),
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $object
+     * @return array<string, mixed>
+     */
+    private function resolveBattle(User $user, PlayerRegionRun $run, array $object, RegionDefinition $region): array
     {
         $team = $this->campaignTeam($user);
+        $node = [
+            'id' => $object['id'],
+            'row' => (int) ($object['tier'] ?? 0),
+            'type' => $object['kind'] === 'boss' ? 'boss' : (($object['elite'] ?? false) ? 'elite' : 'battle'),
+            'budget' => (int) $object['budget'],
+            'enemies' => $object['enemies'],
+        ];
         $outcome = $this->runBattle->fight($user, $team, $node, $region);
 
         if (! $outcome['won']) {
             $run->update(['status' => PlayerRegionRun::STATUS_ABANDONED]);
 
             return [
-                'type' => $node['type'],
+                'type' => 'battle',
                 'won' => false,
                 'runEnded' => true,
                 'battleId' => $outcome['battle']->id,
@@ -212,14 +324,14 @@ class RegionRun
             ];
         }
 
-        $this->advance($run, $node);
-        if ($node['type'] === 'boss') {
+        $this->markResolved($run, $object['id']);
+        if ($object['kind'] === 'boss') {
             $run->update(['status' => PlayerRegionRun::STATUS_CLEARED]);
             $this->recordClear($user, $region);
         }
 
         return [
-            'type' => $node['type'],
+            'type' => 'battle',
             'won' => true,
             'battleId' => $outcome['battle']->id,
             'result' => $outcome['result'],
@@ -229,28 +341,24 @@ class RegionRun
     }
 
     /**
-     * @param  array<string, mixed>  $node
+     * @param  array<string, mixed>  $object
      * @return array<string, mixed>
      */
-    private function resolveLoot(User $user, PlayerRegionRun $run, array $node, RegionDefinition $region): array
+    private function resolveTreasure(User $user, PlayerRegionRun $run, array $object): array
     {
-        $rng = new SeededRng((int) $run->seed + crc32($node['id']));
-        $reward = $rng->chance(32)
-            ? $this->grant->grant($user, ['type' => 'can', 'slug' => $region->drops['cans'][0] ?? 'rusty', 'qty' => 1])
-            : $this->grant->grant($user, ['type' => 'ingredient', 'slug' => $rng->pick($region->drops['ingredients']), 'qty' => 2 + $rng->int(2)]);
-
-        $this->advance($run, $node);
+        $reward = $this->grant->grant($user, $object['reward']);
+        $this->markResolved($run, $object['id']);
 
         return ['type' => 'loot', 'rewards' => [$reward], 'run' => $this->view($run->fresh())];
     }
 
     /**
-     * @param  array<string, mixed>  $node
+     * @param  array<string, mixed>  $object
      * @return array<string, mixed>
      */
-    private function resolveEvent(User $user, PlayerRegionRun $run, array $node, RegionDefinition $region): array
+    private function resolveEvent(User $user, PlayerRegionRun $run, array $object, RegionDefinition $region): array
     {
-        $rng = new SeededRng((int) $run->seed + crc32('event'.$node['id']));
+        $rng = new SeededRng((int) $run->seed + crc32('event'.$object['id']) + (int) $run->day);
         $outcome = $this->weightedPick($rng, config('regions.event_weights'));
 
         if ($outcome === 'skarb') {
@@ -258,38 +366,38 @@ class RegionRun
             if ($rng->chance(25)) {
                 $rewards[] = $this->grant->grant($user, ['type' => 'can', 'slug' => $region->drops['cans'][0] ?? 'rusty', 'qty' => 1]);
             }
-            $this->advance($run, $node);
+            $this->markResolved($run, $object['id']);
 
             return ['type' => 'event', 'event' => 'skarb', 'rewards' => $rewards, 'run' => $this->view($run->fresh())];
         }
 
         if ($outcome === 'trening') {
-            $xp = 30 + (int) $node['row'] * 6;
+            $xp = 28 + (int) $run->day * 5;
             $this->runBattle->awardFighterXp($this->campaignTeam($user), $xp);
-            $this->advance($run, $node);
+            $this->markResolved($run, $object['id']);
 
             return ['type' => 'event', 'event' => 'trening', 'rewards' => [['type' => 'fighterXp', 'amount' => $xp]], 'run' => $this->view($run->fresh())];
         }
 
         if ($outcome === 'handlarz') {
-            return $this->openMerchant($run, $node, $region, rare: true);
+            return $this->openMerchant($run, $object, rare: true);
         }
 
         // pulapka
         if ($rng->chance(50)) {
             $lost = 40 + $rng->int(50);
             $user->playerProfile()->decrement('coins', min($lost, (int) $user->playerProfile->coins));
-            $this->advance($run, $node);
+            $this->markResolved($run, $object['id']);
 
             return ['type' => 'event', 'event' => 'pulapka', 'rewards' => [['type' => 'coins', 'amount' => -$lost]], 'run' => $this->view($run->fresh())];
         }
 
         $team = $this->campaignTeam($user);
         $ambush = [
-            'id' => $node['id'],
-            'row' => $node['row'],
+            'id' => $object['id'],
+            'row' => 1,
             'type' => 'battle',
-            'budget' => (int) round(($region->enemy_budget + $node['row'] * (int) config('regions.budget_step_per_row')) * 0.8),
+            'budget' => (int) round((int) $region->enemy_budget * 1.15),
             'enemies' => array_slice($region->enemy_pool, 0, 2),
         ];
         $outcome = $this->runBattle->fight($user, $team, $ambush, $region);
@@ -298,18 +406,19 @@ class RegionRun
 
             return ['type' => 'event', 'event' => 'zasadzka', 'won' => false, 'runEnded' => true, 'battleId' => $outcome['battle']->id, 'result' => $outcome['result'], 'run' => $this->view($run->fresh())];
         }
-        $this->advance($run, $node);
+        $this->markResolved($run, $object['id']);
 
         return ['type' => 'event', 'event' => 'zasadzka', 'won' => true, 'battleId' => $outcome['battle']->id, 'result' => $outcome['result'], 'rewards' => $outcome['rewards'], 'run' => $this->view($run->fresh())];
     }
 
     /**
-     * @param  array<string, mixed>  $node
+     * @param  array<string, mixed>  $object
      * @return array<string, mixed>
      */
-    private function openMerchant(PlayerRegionRun $run, array $node, RegionDefinition $region, bool $rare = false): array
+    private function openMerchant(PlayerRegionRun $run, array $object, bool $rare = false): array
     {
-        $rng = new SeededRng((int) $run->seed + crc32('shop'.$node['id']));
+        $region = RegionDefinition::query()->where('slug', $run->region_slug)->firstOrFail();
+        $rng = new SeededRng((int) $run->seed + crc32('shop'.$object['id']));
         $offers = [];
         $count = $rare ? 1 : 3;
 
@@ -338,23 +447,9 @@ class RegionRun
             ];
         }
 
-        $run->update(['active_merchant' => ['nodeId' => $node['id'], 'offers' => $offers]]);
+        $run->update(['active_merchant' => ['objectId' => $object['id'], 'offers' => $offers]]);
 
         return ['type' => 'merchant', 'offers' => $offers, 'run' => $this->view($run->fresh())];
-    }
-
-    /**
-     * @param  array<string, mixed>  $node
-     */
-    private function advance(PlayerRegionRun $run, array $node): void
-    {
-        $cleared = $run->cleared_node_ids;
-        $cleared[] = $node['id'];
-        $run->update([
-            'cleared_node_ids' => array_values(array_unique($cleared)),
-            'current_row' => $node['row'],
-            'last_node_id' => $node['id'],
-        ]);
     }
 
     private function recordClear(User $user, RegionDefinition $region): void
@@ -369,19 +464,148 @@ class RegionRun
     }
 
     /**
-     * @return array<string, mixed>
+     * Breadth-first shortest path over passable tiles. Un-cleared objects block
+     * transit but the destination tile itself is always allowed as the endpoint.
+     *
+     * @param  array{0: int, 1: int}  $from
+     * @param  array{0: int, 1: int}  $to
+     * @return list<array{0: int, 1: int}>|null
      */
-    private function findNode(PlayerRegionRun $run, ?string $nodeId): array
+    private function findPath(PlayerRegionRun $run, array $from, array $to): ?array
     {
-        foreach ($run->map['rows'] as $row) {
-            foreach ($row['nodes'] as $node) {
-                if ($node['id'] === $nodeId) {
-                    return $node;
+        $map = $run->map;
+        $w = (int) $map['width'];
+        $h = (int) $map['height'];
+        $blocked = $this->blockedTiles($run);
+        $toKey = $to[0].','.$to[1];
+
+        $queue = [$from];
+        $prev = [$from[0].','.$from[1] => null];
+
+        while ($queue !== []) {
+            [$cx, $cy] = array_shift($queue);
+            if ($cx === $to[0] && $cy === $to[1]) {
+                break;
+            }
+            foreach ([[1, 0], [-1, 0], [0, 1], [0, -1]] as [$dx, $dy]) {
+                $nx = $cx + $dx;
+                $ny = $cy + $dy;
+                if ($nx < 0 || $ny < 0 || $nx >= $w || $ny >= $h) {
+                    continue;
+                }
+                $key = $nx.','.$ny;
+                if (array_key_exists($key, $prev)) {
+                    continue;
+                }
+                if (in_array($map['terrain'][$ny * $w + $nx], self::IMPASSABLE, true)) {
+                    continue;
+                }
+                if ($key !== $toKey && isset($blocked[$key])) {
+                    continue;
+                }
+                $prev[$key] = [$cx, $cy];
+                $queue[] = [$nx, $ny];
+            }
+        }
+
+        if (! array_key_exists($toKey, $prev)) {
+            return null;
+        }
+
+        $path = [];
+        $cur = $to;
+        while ($cur !== null) {
+            $path[] = $cur;
+            $cur = $prev[$cur[0].','.$cur[1]];
+        }
+
+        return array_reverse($path);
+    }
+
+    /**
+     * @return array<string, true>
+     */
+    private function blockedTiles(PlayerRegionRun $run): array
+    {
+        $resolved = $run->resolved_object_ids ?? [];
+        $blocked = [];
+        foreach ($run->map['objects'] as $o) {
+            if (! in_array($o['id'], $resolved, true)) {
+                $blocked[$o['x'].','.$o['y']] = true;
+            }
+        }
+
+        return $blocked;
+    }
+
+    /**
+     * @param  array{0: int, 1: int}  $land
+     * @param  list<array{0: int, 1: int}>  $path
+     */
+    private function walkTo(PlayerRegionRun $run, array $land, array $path): void
+    {
+        $run->update([
+            'hero_x' => $land[0],
+            'hero_y' => $land[1],
+            'revealed' => $this->reveal($run, $path),
+        ]);
+    }
+
+    /**
+     * @param  list<array{0: int, 1: int}>  $cells
+     * @return list<string>
+     */
+    private function reveal(PlayerRegionRun $run, array $cells): array
+    {
+        $map = $run->map;
+        $w = (int) $map['width'];
+        $h = (int) $map['height'];
+        $radius = (int) config('regions.overworld.reveal_radius');
+
+        $set = array_fill_keys($run->revealed ?? [], true);
+        foreach ($cells as [$cx, $cy]) {
+            for ($dy = -$radius; $dy <= $radius; $dy++) {
+                for ($dx = -$radius; $dx <= $radius; $dx++) {
+                    $nx = $cx + $dx;
+                    $ny = $cy + $dy;
+                    if ($nx < 0 || $ny < 0 || $nx >= $w || $ny >= $h) {
+                        continue;
+                    }
+                    $set[$nx.','.$ny] = true;
                 }
             }
         }
 
-        throw new StageLockedException('Nie ma takiego węzła.');
+        return array_keys($set);
+    }
+
+    private function markResolved(PlayerRegionRun $run, string $objectId): void
+    {
+        $ids = $run->resolved_object_ids ?? [];
+        $ids[] = $objectId;
+        $run->update(['resolved_object_ids' => array_values(array_unique($ids))]);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function unresolvedObjectAt(PlayerRegionRun $run, int $x, int $y): ?array
+    {
+        $resolved = $run->resolved_object_ids ?? [];
+        foreach ($run->map['objects'] as $o) {
+            if ((int) $o['x'] === $x && (int) $o['y'] === $y && ! in_array($o['id'], $resolved, true)) {
+                return $o;
+            }
+        }
+
+        return null;
+    }
+
+    private function assertActive(PlayerRegionRun $run): void
+    {
+        if ($run->status !== PlayerRegionRun::STATUS_ACTIVE) {
+            throw new StageLockedException('Ta wyprawa się zakończyła.');
+        }
     }
 
     /**
@@ -389,15 +613,45 @@ class RegionRun
      */
     public function view(PlayerRegionRun $run): array
     {
+        $map = $run->map;
+        $resolved = $run->resolved_object_ids ?? [];
+        $revealed = array_fill_keys($run->revealed ?? [], true);
+
+        $objects = [];
+        foreach ($map['objects'] as $o) {
+            if (in_array($o['id'], $resolved, true)) {
+                continue;
+            }
+            if (! isset($revealed[$o['x'].','.$o['y']])) {
+                continue;
+            }
+            $entry = [
+                'id' => $o['id'],
+                'x' => (int) $o['x'],
+                'y' => (int) $o['y'],
+                'kind' => $o['kind'],
+            ];
+            if ($o['kind'] === 'enemy' || $o['kind'] === 'boss') {
+                $entry['elite'] = (bool) ($o['elite'] ?? false);
+                $entry['budget'] = (int) $o['budget'];
+                $entry['enemies'] = $o['enemies'];
+            }
+            $objects[] = $entry;
+        }
+
         return [
             'runId' => $run->id,
             'regionSlug' => $run->region_slug,
             'status' => $run->status,
-            'currentRow' => $run->current_row,
-            'clearedNodeIds' => $run->cleared_node_ids,
-            'reachableNodeIds' => $this->reachableNodeIds($run),
+            'day' => (int) $run->day,
+            'movementLeft' => (int) $run->movement_left,
+            'movementMax' => (int) $run->movement_max,
+            'hero' => ['x' => (int) $run->hero_x, 'y' => (int) $run->hero_y],
+            'size' => ['width' => (int) $map['width'], 'height' => (int) $map['height']],
+            'terrain' => $map['terrain'],
+            'revealed' => array_values($run->revealed ?? []),
+            'objects' => $objects,
             'activeMerchant' => $run->active_merchant,
-            'map' => $run->map,
         ];
     }
 

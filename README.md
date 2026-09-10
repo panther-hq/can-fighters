@@ -244,17 +244,20 @@ return and more ways to earn cans.
   is a can. **Shop** (`GET /api/shop`, `POST /api/shop/{offer}/buy`) —
   per-player daily stock (can / ingredients / equipment) for coins.
   `Domain\Economy\{GrantReward,DailyReward,Shop}`.
-- **Roguelike region map** — the campaign is a branching node graph you route
-  through (battle / elite / loot / merchant / event / boss), generated per run
-  from a seed. 4 regions (spec §6) unlocking in sequence. Loot nodes give free
-  ingredients/cans; a lost fight or ambush ends the run; the boss clears the
-  region. `Domain\PvE\{RegionMapGenerator,RunBattle,RegionRun}`,
-  `region_definitions` / `player_region_runs` / `player_region_clears`.
-  Replaces the old flat stage list.
+- **Region exploration map** (Heroes-3 style) — a run is a tile map you walk a
+  hero across: a per-day movement budget (`Zakończ dzień` refills it), fog of
+  war, roaming enemies that drift between turns, treasure piles, `?` event
+  tiles, and a boss that clears the region. Shortest-path movement; stepping
+  onto an object resolves it (battle / loot / event / wandering merchant); a
+  lost fight ends the run. 4 regions (spec §6) unlock in sequence.
+  `Domain\PvE\{OverworldMapGenerator,RunBattle,RegionRun}`, `config/regions.php`,
+  `region_definitions` / `player_region_runs` / `player_region_clears`. SPA:
+  `OverworldScene` (Phaser) + `OverworldView`. Replaces the old flat stage list
+  and the earlier roguelike node graph.
 - **Kolekcja** panel (`GET /api/collection`) — progress goals (ingredients
   found, regions cleared, best streak, arena) on the dashboard.
 
-**251 feature/unit tests.**
+**256 feature/unit tests.**
 
 ## Done
 

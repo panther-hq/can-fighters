@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
-    'user_id', 'region_slug', 'seed', 'map', 'current_row',
-    'cleared_node_ids', 'last_node_id', 'active_merchant', 'status',
+    'user_id', 'region_slug', 'seed', 'map', 'hero_x', 'hero_y',
+    'movement_left', 'movement_max', 'day', 'revealed',
+    'resolved_object_ids', 'active_merchant', 'status',
 ])]
 class PlayerRegionRun extends Model
 {
@@ -25,8 +26,13 @@ class PlayerRegionRun extends Model
         return [
             'seed' => 'integer',
             'map' => 'array',
-            'current_row' => 'integer',
-            'cleared_node_ids' => 'array',
+            'hero_x' => 'integer',
+            'hero_y' => 'integer',
+            'movement_left' => 'integer',
+            'movement_max' => 'integer',
+            'day' => 'integer',
+            'revealed' => 'array',
+            'resolved_object_ids' => 'array',
             'active_merchant' => 'array',
         ];
     }

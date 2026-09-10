@@ -28,11 +28,15 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('region_slug');
             $table->unsignedBigInteger('seed');
-            $table->json('map');
-            $table->integer('current_row')->default(-1);
-            $table->json('cleared_node_ids');
-            $table->string('last_node_id')->nullable();
-            $table->json('active_merchant')->nullable();
+            $table->json('map');                        // { width, height, terrain[], start, objects[] }
+            $table->unsignedInteger('hero_x');
+            $table->unsignedInteger('hero_y');
+            $table->unsignedInteger('movement_left');
+            $table->unsignedInteger('movement_max');
+            $table->unsignedInteger('day')->default(1);
+            $table->json('revealed');                   // ["x,y", ...] fog-of-war uncovered tiles
+            $table->json('resolved_object_ids');        // ids of enemies/treasure/events already cleared
+            $table->json('active_merchant')->nullable(); // { objectId, offers[] }
             $table->string('status')->default('active'); // active | cleared | abandoned
             $table->timestamps();
 

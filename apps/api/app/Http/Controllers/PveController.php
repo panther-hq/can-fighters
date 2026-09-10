@@ -39,21 +39,33 @@ class PveController extends Controller
         return response()->json(['run' => $active ? $this->regionRun->view($active) : null]);
     }
 
-    public function visitNode(Request $request, string $node): JsonResponse
+    public function move(Request $request): JsonResponse
     {
         $user = $request->user();
         $run = $this->activeRunOr404($user);
+        $data = $request->validate([
+            'x' => ['required', 'integer', 'min:0'],
+            'y' => ['required', 'integer', 'min:0'],
+        ]);
 
         $outcome = Idempotency::run(
             $user,
-            "pve.run.{$run->id}.{$node}",
+            "pve.run.{$run->id}.move",
             $request->header('Idempotency-Key'),
-            fn (): array => [200, $this->regionRun->visit($user, $run, $node)],
+            fn (): array => [200, $this->regionRun->move($user, $run, (int) $data['x'], (int) $data['y'])],
         );
 
         return response()
             ->json($outcome['body'], $outcome['status'])
             ->header('Idempotency-Replayed', $outcome['replayed'] ? 'true' : 'false');
+    }
+
+    public function endDay(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $run = $this->activeRunOr404($user);
+
+        return response()->json($this->regionRun->endDay($user, $run));
     }
 
     public function buy(Request $request): JsonResponse
@@ -65,7 +77,7 @@ class PveController extends Controller
         return response()->json($this->regionRun->buyFromMerchant($user, $run, $offer));
     }
 
-    public function advance(Request $request): JsonResponse
+    public function leaveMerchant(Request $request): JsonResponse
     {
         $run = $this->activeRunOr404($request->user());
 

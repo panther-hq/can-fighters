@@ -1,27 +1,34 @@
 <?php
 
 /*
-| Roguelike region-map generation. A run is a branching graph of nodes you
-| route through from the bottom row to the boss on top.
+| Region exploration (spec §61, Heroes-3 style). A run is a tile map you walk
+| a hero across: fog of war, a movement-point budget per day, roaming enemies,
+| treasure piles, "?" event tiles, and a boss guarding the region's completion.
 */
 
 return [
-    'choice_rows' => 5,          // + 1 boss row on top
-    'nodes_per_row' => [2, 3, 3, 4],
-    'budget_step_per_row' => 9,  // enemy budget grows as you climb
-    'elite_budget_multiplier' => 1.35,
-    'boss_budget_multiplier' => 1.9,
-
-    // Node-type weights per choice-row index (0 = bottom).
-    'row_weights' => [
-        0 => ['battle' => 6, 'loot' => 2, 'event' => 1],
-        1 => ['battle' => 4, 'loot' => 2, 'event' => 3, 'merchant' => 1],
-        2 => ['battle' => 3, 'event' => 3, 'merchant' => 2, 'elite' => 2],
-        3 => ['battle' => 2, 'event' => 3, 'merchant' => 2, 'elite' => 3],
-        4 => ['battle' => 2, 'event' => 2, 'elite' => 4, 'loot' => 1],
+    'overworld' => [
+        'width' => 12,
+        'height' => 12,
+        'movement_per_day' => 6,     // tiles the hero can step per day
+        'reveal_radius' => 2,        // Chebyshev radius uncovered around the hero
+        'obstacle_density' => 15,    // % of tiles seeded as impassable rock
+        'water_density' => 5,        // % seeded as impassable water
+        'objects' => [
+            'enemies' => 5,
+            'treasures' => 4,
+            'events' => 3,
+        ],
+        'tier_step' => 2,                // hero-distance tiles per difficulty tier
+        'max_tier' => 5,
+        'budget_step_per_tier' => 9,     // enemy budget grows with distance from start
+        'elite_chance' => 22,            // % of roaming enemies that are elites
+        'elite_budget_multiplier' => 1.35,
+        'boss_tier' => 6,
+        'boss_budget_multiplier' => 1.9,
     ],
 
-    // Base rewards for a plain battle node at row 0; scaled by row + node kind.
+    // Base rewards for a plain battle at tier 0; scaled by tier + kind (RunBattle).
     'battle_rewards' => [
         'coins' => 30,
         'xp' => 16,
@@ -32,7 +39,7 @@ return [
     'event_weights' => [
         'skarb' => 4,      // coins + chance of a can
         'trening' => 3,    // fighter xp
-        'handlarz' => 2,   // one cheap rare merchant offer
+        'handlarz' => 2,   // a wandering merchant with one cheap rare offer
         'pulapka' => 2,    // lose coins or a small ambush
     ],
 ];

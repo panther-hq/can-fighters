@@ -103,9 +103,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('pve/regions', [PveController::class, 'regions']);
     Route::post('pve/regions/{region}/run', [PveController::class, 'startRun']);
     Route::get('pve/run', [PveController::class, 'run']);
-    Route::post('pve/run/visit/{node}', [PveController::class, 'visitNode']);
+    Route::post('pve/run/move', [PveController::class, 'move']);
+    Route::post('pve/run/end-day', [PveController::class, 'endDay']);
     Route::post('pve/run/buy', [PveController::class, 'buy']);
-    Route::post('pve/run/advance', [PveController::class, 'advance']);
+    Route::post('pve/run/leave-merchant', [PveController::class, 'leaveMerchant']);
     Route::post('pve/run/abandon', [PveController::class, 'abandon']);
     Route::get('pve/battles/{battle}', [PveController::class, 'battleShow']);
 
