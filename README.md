@@ -252,8 +252,10 @@ return and more ways to earn cans.
   lost fight ends the run. 4 regions (spec §6) unlock in sequence.
   `Domain\PvE\{OverworldMapGenerator,RunBattle,RegionRun}`, `config/regions.php`,
   `region_definitions` / `player_region_runs` / `player_region_clears`. SPA:
-  `OverworldScene` (Phaser) + `OverworldView`. Replaces the old flat stage list
-  and the earlier roguelike node graph.
+  `OverworldScene` (Phaser) + `OverworldView`, with a hand-drawn pixel-art
+  tileset / hero / props rasterised into textures at runtime (`pixelart.ts` —
+  no external assets), animated water, soft radial fog of war. Replaces the old
+  flat stage list and the earlier roguelike node graph.
 - **Kolekcja** panel (`GET /api/collection`) — progress goals (ingredients
   found, regions cleared, best streak, arena) on the dashboard.
 

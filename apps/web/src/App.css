@@ -1267,19 +1267,22 @@ code {
 
 .overworld__stage {
   width: 100%;
-  max-width: 460px;
+  max-width: 420px;
   margin: 0 auto;
   border: 1px solid #232a38;
   border-radius: 0.8rem;
   overflow: hidden;
   background: #0b0e14;
   touch-action: manipulation;
+  aspect-ratio: 1 / 1;
 }
 
 .overworld__stage canvas {
   display: block;
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .overworld__tip {
